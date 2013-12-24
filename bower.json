@@ -1,0 +1,25 @@
+{
+  "name": "requirejs-router",
+  "version": "0.1.0",
+  "homepage": "https://github.com/erikringsmuth/requirejs-router",
+  "authors": [
+    "Erik Ringsmuth <erik.ringsmuth@gmail.com>"
+  ],
+  "description": "RequireJS Router",
+  "main": "router.js",
+  "keywords": [
+    "router",
+    "RequireJS",
+    "AMD"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "license",
+    "readme.md"
+  ]
+}
