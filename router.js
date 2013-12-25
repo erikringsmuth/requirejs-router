@@ -1,7 +1,7 @@
 // RequireJS Router.
 //
 // Author: Erik Ringsmuth
-// Version: 0.1.0
+// Version: 0.1.1
 // License: MIT
 
 /*global define, require, console*/
