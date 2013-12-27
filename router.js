@@ -1,7 +1,7 @@
 // RequireJS Router.
 //
 // Author: Erik Ringsmuth
-// Version: 0.1.1
+// Version: 0.1.2
 // License: MIT
 
 /*global define, require, console*/
@@ -62,7 +62,7 @@ define([], function() {
     for (var route in router.routes) {
       (function(route) {
         router.routes[route].isActive = function isActive() {
-          if (route === Router.uriHashRoute()) {
+          if (route === Router.uriFragmentPath()) {
             return true;
           }
           return false;
@@ -99,9 +99,9 @@ define([], function() {
 
   // Static methods
 
-  // The current URI hash path
-  // Example URI 'http://host/#/hashroute?hashSearchParam1=true' will return '#/hashroute'
-  Router.uriHashRoute = function uriHashRoute() {
+  // The current URI fragment (hash) path
+  // Example URI 'http://host/#/fragmentpath?fragmentSearchParam1=true' will return '#/fragmentpath'
+  Router.uriFragmentPath = function uriFragmentPath() {
     var hash = window.location.hash;
     var searchParametersIndex = hash.indexOf('?');
     if (searchParametersIndex === -1) {
@@ -111,8 +111,8 @@ define([], function() {
   };
 
   // The current URI search parameters
-  // Example URI 'http://host/#/hashroute?hashSearchParam1=true' will return '?hashSearchParam1=true'
-  Router.uriHashSearchParameters = function uriHashSearchParameters() {
+  // Example URI 'http://host/#/fragmentpath?fragmentSearchParam1=true' will return '?fragmentSearchParam1=true'
+  Router.uriFragmentSearchParameters = function uriFragmentSearchParameters() {
     var hash = window.location.hash;
     var searchParametersIndex = hash.indexOf('?');
     if (searchParametersIndex === -1) {
