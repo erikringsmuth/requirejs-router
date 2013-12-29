@@ -127,7 +127,7 @@ define([], function() {
       // router.routes.*.matches() - each route has this method to determine if the route matches the window location
       for (var routeName in router.routes) {
         (function(route) {
-          router.routes[route].matches = function matches() {
+          route.matches = function matches() {
             return router.testRoute(window.location, route);
           };
         })(router.routes[routeName]);
@@ -218,7 +218,7 @@ define([], function() {
     loadCurrentRoute: function loadCurrentRoute() {
       var route = router.currentRoute();
       if (route !== null) {
-        require([router.routes[route].module], router.routeLoadedCallback, router.notFoundCallback);
+        require([route.module], router.routeLoadedCallback, router.notFoundCallback);
       }
       return router;
     }
