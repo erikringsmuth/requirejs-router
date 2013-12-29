@@ -26,71 +26,40 @@
       if (passed) {
         body.innerHTML += '<br />Test succeeded - ' + message;
       } else {
-        body.innerHTML += '<br /><span style="color: red;">Test failed - ' + message + '</span>';
+        body.innerHTML += '<br /><span style="color: red;">Test failed - ' + message + '. - ' + route.testFailMessage + '</span>';
       }
     };
 
-    var windowLocation = {
-      href: '',
-      pathname: '',
-      search: '',
-      hash: ''
-    };
+    var url = '';
 
-    // These tests assume the window.location object is consistent across browsers, which it isn't. Hint... IE
-    windowLocation = {
-      href: 'http://domain.com/example/path?queryParam1=true&queryParam2=example%20string',
-      pathname: '/example/path',
-      search: '?queryParam1=true&queryParam2=example%20string',
-      hash: ''
-    };
-    body.innerHTML += '<br /><br />Regular path and query parameters<br />Uri: ' + windowLocation.href;
+    url = 'http://domain.com/example/path?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Regular path and query parameters<br />Uri: ' + url;
     for (var i in routes) {
-      runTest(windowLocation, routes[i]);
+      runTest(url, routes[i]);
     }
 
-    windowLocation = {
-      href: 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string',
-      pathname: '/',
-      search: '',
-      hash: '#/example/path?queryParam1=true&queryParam2=example%20string'
-    };
-    body.innerHTML += '<br /><br />Hash path and query parameters<br />Uri: ' + windowLocation.href;
+    url = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Hash path and query parameters<br />Uri: ' + url;
     for (i in routes) {
-      runTest(windowLocation, routes[i]);
+      runTest(url, routes[i]);
     }
 
-    windowLocation = {
-      href: 'http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string',
-      pathname: '/',
-      search: '',
-      hash: '#!/example/path?queryParam1=true&queryParam2=example%20string'
-    };
-    body.innerHTML += '<br /><br />Hash bang path and query parameters<br />Uri: ' + windowLocation.href;
+    url = 'http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Hash bang path and query parameters<br />Uri: ' + url;
     for (i in routes) {
-      runTest(windowLocation, routes[i]);
+      runTest(url, routes[i]);
     }
 
-    windowLocation = {
-      href: 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string',
-      pathname: '/other/path',
-      search: '?queryParam3=false',
-      hash: '#/example/path?queryParam1=true&queryParam2=example%20string'
-    };
-    body.innerHTML += '<br /><br />Regular path and query parameters with hash path and query parameters<br />Uri: ' + windowLocation.href;
+    url = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Regular path and query parameters with hash path and query parameters<br />Uri: ' + url;
     for (i in routes) {
-      runTest(windowLocation, routes[i]);
+      runTest(url, routes[i]);
     }
 
-    windowLocation = {
-      href: 'http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string',
-      pathname: '/other/path',
-      search: '?queryParam3=false',
-      hash: '#!/example/path?queryParam1=true&queryParam2=example%20string'
-    };
-    body.innerHTML += '<br /><br />Regular path and query parameters with hash bang path and query parameters<br />Uri: ' + windowLocation.href;
+    url = 'http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Regular path and query parameters with hash bang path and query parameters<br />Uri: ' + url;
     for (i in routes) {
-      runTest(windowLocation, routes[i]);
+      runTest(url, routes[i]);
     }
   });
 })();
