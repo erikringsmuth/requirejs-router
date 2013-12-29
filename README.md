@@ -3,6 +3,35 @@ The RequireJS Router lazy loads modules based on the URI route. Lazy loading pre
 
 You initialize the RequireJS Router with a map of URI routes to RequireJS modules. The modules are loaded as the user navigates to those routes.
 
+## Routes
+The router uses `window.location` to determine the active route. You configure routes using the path and query parameters. The first matching route is selected as the active route. Hash paths and query parameters will also match. If a hash path exists (a hash starting in #/ or #!/) it will ignore the regular path and query parameters and match against the hash path and query parameters instead.
+
+Example `window.location`s that will match against the same path and query parameters.
+- http://domain.com/example/path?queryParam1=true&queryParam2=example%20string
+- http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string
+- http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string
+- http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string
+- http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string
+
+In all of these cases
+- `path` = '/example/path'
+- `queryParameters` = ['queryParam1=true', 'queryParam2=example%20string']
+
+The 4th and 5th examples will ignore the normal path and query parameters since a hash path exists.
+
+To match on the path you can either specify the exact string or include wildcards '*' to match sections of the path between slashes '/' or the start of the query. To match against the query you specify an array of query parameters. When you specify a path and query parameters or multiple query parameters it matches against ALL of the options you specify. The one exception is the path '*' which will match everything. These are some examples.
+
+```js
+routes: {
+  route1: {path: '/example/path', module: 'info/infoView'}, // matches
+  route2: {path: '/example/*', module: 'info/infoView'}, // matches
+  route3: {path: '/example/path', queryParameters: ['queryParam2=example%20string'], module: 'info/infoView'}, // matches
+  route4: {queryParameters: ['queryParam1=true', 'queryParam2=example%20string'], module: 'info/infoView'}, // matches
+  route5: {path: '*', module: 'notFound/notFoundView'}, // matches everything - this route would typically be used to load a 404 page
+  route6: {path: '/example/*' queryParameters: ['queryParam3=false'], module: 'info/infoView'} // doesn't match - the query parameter fails the match
+}
+```
+
 ## API
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
 
@@ -11,12 +40,17 @@ Here's an example of loading and configuring the router followed by triggering t
 require(['router'], function(router) {
   router.config({
     routes: {
-      '': {module: 'info/infoView'},
-      '#/': {module: 'info/infoView'},
-      '#/api': {module: 'api/apiView'},
-      '#/example': {module: 'example/exampleView'},
-      '#/dev': {module: 'dev/child/childView'},
-      'not-found': {module: 'notFound/NotFoundView'}
+      // root matches path = '/' or '/view-js'
+      root: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/'}) || router.testRoute(window.location.href, {path: '/view-js'})) ? true : false; }, module: 'info/infoView'},
+      api: {path: '/api', module: 'api/apiView'},
+      example: {path: '/example', module: 'example/exampleView'},
+      dev: {path: '/dev', module: 'dev/child/childView'},
+      notFound: {path: '*', module: 'notFound/NotFoundView'},
+
+      // You can't use these directly to load a route. They're used by sub-views for their `.matchesUrl()` method.
+      todoAll: {queryParameters: ['todoFilter=all']},
+      todoActive: {queryParameters: ['todoFilter=active']},
+      todoCompleted: {queryParameters: ['todoFilter=completed']}
     },
 
     routeLoadedCallback: function routeLoadedCallback(View) {
@@ -24,19 +58,20 @@ require(['router'], function(router) {
       body.innerHTML = null;
       body.appendChild(new View().render().outerEl);
     }
-  }).loadActiveRoute();
+  }).loadCurrentRoute();
 });
 ```
 
-Properties:
-- router.config() - use to configure the router
-- router.routeLoadedCallback(Module) - called when RequireJS finishes loading a module for a route
-- router.loadActiveRoute() - triggers RequireJS to load the module for the current route
-- router.activeRoute() - the current route (ex: '#/api')
-- router.uriFragmentPath() - example URI 'http://host/#/fragmentpath?fragmentSearchParam1=true' will return '#/fragmentpath'
-- router.uriFragmentSearchParameters() - example URI 'http://host/#/fragmentpath?fragmentSearchParam1=true' will return '?fragmentSearchParam1=true'
-- router.hashChangeEventHandler() - listens for hashchange events and calls `router.loadActiveRoute()`
-- router.notFoundCallback() - called when there is no matching route or RequireJS fails to load the module. This looks for the 'not-found' route and loads that module. (example 'not-found' route: `'not-found': {module: 'notFound/NotFoundView'}`)
+Router properties:
+- `router.config()` - configure the router
+- `router.routes` - all defined routes
+- `router.routeLoadedCallback(Module)` - called when RequireJS finishes loading a module for a route
+- `router.loadCurrentRoute()` - triggers RequireJS to load the module for the current route
+- `router.currentRoute()` - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
+- `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
+- `router.testRoute(url, route)` - determines if the route matches the URL
+- `router.parseUrl(url)` - parses the url to get the path and search
+- `router.routes.*.matchesUrl()` - each route has this method to determine if the route matches the URL
 
 ## How to use
 Let's go over the case where your site has a consistent layout (header, footer, etc.) that you want rendered on every page. Let's call this the `indexView`. When you click a tab in the header it routes to a different page. You need to re-render the `indexView` to show which tab is now active. There are two main ways to do this. If you use views that support parent views similar to .NET master pages then the set up is simple since you can route directly to the child view. If you use a more classic style of views like Backbone.js then you need a hook to render the parent view before rendering the child view. Let's go over the easy case first.

@@ -38,6 +38,12 @@
       runTest(url, routes[i]);
     }
 
+    url = 'http://domain.com/example/path/?queryParam1=true&queryParam2=example%20string';
+    body.innerHTML += '<br /><br />Regular path and query parameters with trailing path slash<br />Uri: ' + url;
+    for (i in routes) {
+      runTest(url, routes[i]);
+    }
+
     url = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string';
     body.innerHTML += '<br /><br />Hash path and query parameters<br />Uri: ' + url;
     for (i in routes) {

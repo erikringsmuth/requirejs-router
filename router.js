@@ -3,75 +3,6 @@
 // Author: Erik Ringsmuth
 // Version: 0.1.4
 // License: MIT
-//
-// The router uses `window.location` to determine the active route. You configure routes using the path
-// and query parameters. The first matching route is selected as the active route. Hash paths and query
-// parameters will also match. If a hash path exists (a hash starting in #/ or #!/) it will ignore the
-// regular path and query parameters and match against the hash path and query parameters instead.
-//
-// Example `window.location`s that will match against the same path and query parameters.
-// http://domain.com/example/path?queryParam1=true&queryParam2=example%20string
-// http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string
-// http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string
-// http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string
-// http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string
-//
-// In all of these cases
-// path = '/example/path'
-// queryParameters = ['queryParam1=true', 'queryParam2=example%20string']
-// 
-// The 4th and 5th examples will ignore the normal path and query parameters since a hash path exists.
-//
-// To match on the path you can either specify the exact string or include wildcards '*' to match sections
-// of the path between slashes '/' or the start of the query. To match against the query you specify an array
-// of query parameters. When you specify a path and query parameters or multiple query parameters it matches
-// against ALL of the options you specify. The one exception is the path '*' which will match everything.
-// These are some examples.
-// 
-// routes: {
-//   route1: {path: '/example/path', module: 'info/infoView'}, // matches
-//   route2: {path: '/example/*', module: 'info/infoView'}, // matches
-//   route3: {path: '/example/path', queryParameters: ['queryParam2=example%20string'], module: 'info/infoView'}, // matches
-//   route4: {queryParameters: ['queryParam1=true', 'queryParam2=example%20string'], module: 'info/infoView'}, // matches
-//   route5: {path: '*', module: 'notFound/notFoundView'}, // matches everything - this route would typically be used to load a 404 page
-//   route6: {path: '/example/*' queryParameters: ['queryParam3=false'], module: 'info/infoView'} // doesn't match - the query parameter fails the match
-// }
-//
-// API
-//
-// There is only one instance of the router. Using RequireJS to load the router in multiple modules will
-// always load the same router.
-//
-// Here's an example of loading and configuring the router followed by triggering the initial page load.
-// This effectively runs your app.
-//
-// require(['router'], function(router) {
-//   router.config({
-//     routes: {
-//       root: {path: '/', module: 'info/infoView'},
-//       api: {path: '/api', module: 'api/apiView'},
-//       example: {path: '/example', module: 'example/exampleView'},
-//       notFound: {path: '*', module: 'notFound/NotFoundView'}
-//     },
-//
-//     routeLoadedCallback: function routeLoadedCallback(View) {
-//       var body = document.querySelector('body');
-//       body.innerHTML = null;
-//       body.appendChild(new View().render().outerEl);
-//     }
-//   }).loadCurrentRoute();
-// });
-//
-// Router properties:
-// router.config() - configure the router
-// router.routes - all defined routes
-// router.routeLoadedCallback(Module) - called when RequireJS finishes loading a module for a route
-// router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
-// router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
-// router.urlChangeEventHandler() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
-// router.testRoute(url, route) - determines if the route matches the URL
-// router.parseUrl(url) - parses the url to get the path and search
-// router.routes.*.matchesUrl() - each route has this method to determine if the route matches the URL
 
 /*global define, require, console*/
 /*jshint loopfunc: true*/
@@ -79,7 +10,7 @@ define([], function() {
   'use strict';
 
   // Cache parsed URLs
-  var parseUrlCache = {};
+  var parsedUrlCache = {};
 
   // There can only be one instance of the router
   var router = {
@@ -96,7 +27,7 @@ define([], function() {
     //   routeLoadedCallback: function(Module) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
     config: function config(properties) {
-      // Copy properties from the properties
+      // Copy properties from the config object
       for (var property in properties) {
         router[property] = properties[property];
       }
@@ -124,7 +55,7 @@ define([], function() {
       // router.routeLoadedCallback(Module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
       if (typeof(router.routeLoadedCallback) === 'undefined') {
         router.routeLoadedCallback = function routeLoadedCallback() {
-          console.log('`Router.routeLoadedCallback(Module)` has not been implemented.');
+          console.log('`router.routeLoadedCallback(Module)` has not been implemented.');
         };
       }
 
@@ -208,14 +139,12 @@ define([], function() {
     //
     // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
     //
-    // The URL must contain the leading 'protocol://'
+    // The URL must contain the leading 'protocol://'. We can't rely on `window.location` because IE implemented it
+    // differently than other browsers.
     parseUrl: function parseUrl(url) {
-      // First we have to parse the URL to get the path and search. We can't rely on `window.location` because IE implemented
-      // it differently than everyone else.
-
-      // Check for the cached parsed URL properties
-      if (typeof(parseUrlCache[url]) !== 'undefined') {
-        return parseUrlCache[url];
+      // Check the cache to see if we've already parsed this URL
+      if (typeof(parsedUrlCache[url]) !== 'undefined') {
+        return parsedUrlCache[url];
       }
 
       // The relative URI is everything after the third slash including the third slash
@@ -282,11 +211,11 @@ define([], function() {
       }
 
       // Cache the properties for this URL and return them
-      parseUrlCache[url] = {
+      parsedUrlCache[url] = {
         path: path,
         search: search
       };
-      return parseUrlCache[url];
+      return parsedUrlCache[url];
     },
 
     // router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
