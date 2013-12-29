@@ -129,11 +129,15 @@ define([], function() {
       }
 
       // router.routes.*.matchesUrl() - each route has this method to determine if the route matches the URL
+      //
+      // You can override this with your own function to do a custom matcher.
       for (var routeName in router.routes) {
         (function(route) {
-          route.matchesUrl = function matchesUrl() {
-            return router.testRoute(window.location.href, route);
-          };
+          if (typeof(route.matchesUrl) === 'undefined') {
+            route.matchesUrl = function matchesUrl() {
+              return router.testRoute(window.location.href, route);
+            };
+          }
         })(router.routes[routeName]);
       }
 
@@ -289,7 +293,7 @@ define([], function() {
     currentRoute: function currentRoute() {
       for (var i in router.routes) {
         var route = router.routes[i];
-        if (router.testRoute(window.location.href, route)) {
+        if (route.matchesUrl()) {
           return route;
         }
       }
