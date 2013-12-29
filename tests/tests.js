@@ -14,8 +14,9 @@
       route2: {path: '/example/*', module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match the path with a wildcard.'},
       route3: {path: '/example/path', queryParameters: ['queryParam2=example%20string'], module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match the path and a query parameter'},
       route4: {queryParameters: ['queryParam1=true', 'queryParam2=example%20string'], module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match the query parameters'},
-      route5: {path: '*', module: 'notFound/notFoundView', testShouldMatch: true, testFailMessage: 'the '*' route should match everything.'},
-      route6: {path: '/example/path', queryParameters: ['queryParam3=false'], module: 'info/infoView', testShouldMatch: false, testFailMessage: 'shouldn\'t match because the query parameter doesn\'t exits.'}
+      route5: {queryParameters: ['queryParam1'], module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match based on the existence of a query parameter'},
+      route6: {path: '*', module: 'notFound/notFoundView', testShouldMatch: true, testFailMessage: 'the '*' route should match everything.'},
+      route7: {path: '/example/path', queryParameters: ['queryParam3=false'], module: 'info/infoView', testShouldMatch: false, testFailMessage: 'shouldn\'t match because the query parameter doesn\'t exits.'}
     };
 
     var body = document.querySelector('body');

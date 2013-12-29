@@ -1,7 +1,7 @@
 // RequireJS Router.
 //
 // Author: Erik Ringsmuth
-// Version: 0.1.4
+// Version: 0.1.5
 // License: MIT
 
 /*global define, require, console*/
@@ -73,9 +73,14 @@ define([], function() {
       }
 
       // Set up the window hashchange and popstate event listeners
-      // Todo: use event listeners compatible with IE8-
-      window.addEventListener('hashchange', router.urlChangeEventHandler);
-      window.addEventListener('popstate', router.urlChangeEventHandler);
+      if (window.addEventListener) {
+        window.addEventListener('hashchange', router.urlChangeEventHandler, false);
+        window.addEventListener('popstate', router.urlChangeEventHandler, false);
+      } else {
+        // IE 8 and lower
+        window.attachEvent('hashchange', router.urlChangeEventHandler);
+        window.attachEvent('popstate', router.urlChangeEventHandler);
+      }
 
       return router;
     },
