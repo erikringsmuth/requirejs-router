@@ -1,6 +1,6 @@
 {
   "name": "requirejs-router",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "homepage": "https://github.com/erikringsmuth/requirejs-router",
   "authors": [
     "Erik Ringsmuth <erik.ringsmuth@gmail.com>"
