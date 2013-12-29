@@ -13,6 +13,9 @@
     "AMD"
   ],
   "license": "MIT",
+  "dependencies": {
+    "requirejs": ""
+  },
   "ignore": [
     "**/.*",
     "node_modules",
