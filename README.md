@@ -86,7 +86,7 @@ require(['router'], function(router) {
 
     routeLoadedCallback: function routeLoadedCallback(View) {
       var body = document.querySelector('body');
-      body.innerHTML = null;
+      body.innerHTML = '';
       body.appendChild(new View().render().outerEl);
     }
   });
@@ -160,7 +160,7 @@ router.config({
   routeLoadedCallback: function routeLoadedCallback(module) {
     // Attach the child view to the indexView's main-content section
     var mainContent = indexView.el.querySelector('main#content');
-    mainContent.innerHTML = null;
+    mainContent.innerHTML = '';
     mainContent.appendChild(new module().render().el);
   }
 });
