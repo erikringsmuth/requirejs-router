@@ -173,3 +173,6 @@ indexView.render = function render() {
   return this;
 }
 ```
+
+## Demo site
+The RequireJS Router was written alongside [view.js](https://github.com/erikringsmuth/view-js). The site's source is available in the [gh-pages branch of view-js](https://github.com/erikringsmuth/view-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/view-js/blob/gh-pages/js/main.js). Both view.js and the RequireJS Router are licensed under MIT.
