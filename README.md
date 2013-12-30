@@ -1,45 +1,70 @@
 ## RequireJS Router
 A scalable, lazy loading, AMD router.
 
-A normal Javascript router has dependencies on every file it can route to. This makes it load all of your Javascript up front. The RequireJS Router scales since the user only loads the Javascript for the pages they're navigating to.
+A normal router has dependencies on every file it can route to and loads all of your files up front. The RequireJS Router scales since the user only loads the Javascript for the pages they're navigating to.
 
 ## Routes
-The router uses `window.location.href` to determine the current route. You configure routes by specifying path and query parameters and the modules they map to. The first matching route is selected as the current route. Hash paths and query parameters will also match. If a hash path exists (a hash starting in #/ or #!/) it will ignore the regular path and query parameters and match against the hash path and query parameters instead.
+A route has 4 properties
+- `path` (string)
+- `searchParameters` (string array)
+- `matchesUrl()` function
+- `module` (string)
 
-Example `window.location.href`'s that will all match against the same path and query parameters.
+A simple route object would looke like this `{path: '/example/path', module: 'info/infoView'}`. When you navigate to that path it will load that module.
+
+The routes are first compared against the hash path (a hash starting in `#/` or `#!/`) and fall back to the regular path if no hash path exists. This allows one set of routes to work with hashchange and HTML5 pushState. When a hashchange, popstate, or page load occures the router will find the first matching route and load that module. 
+
+## Pattern Matching
+These URLs will all resolve to this path and set of query parameters.
+- `path = '/example/path'`
+- `queryParameters = ['queryParam1=true', 'queryParam2=example%20string']`
+
+URLs
 - http://domain.com/example/path?queryParam1=true&queryParam2=example%20string
 - http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string
 - http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string
 - http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string
-- http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string
 
-In all of these cases
-- `path` = '/example/path'
-- `queryParameters` = ['queryParam1=true', 'queryParam2=example%20string']
+The 4th example ignores the normal path and query parameters since it has a hash path.
 
-The 4th and 5th examples will ignore the normal path and query parameters since a hash path exists.
+### path
+When you're setting up your routes you can specify an exact string to match or you can use wildcards `*` to match a segment of the path. For example `/customer/*/name` will match `/customer/123/name`. There is also a catch-all path `'*'` that will match any path.
 
-To match on the path you can either specify the exact string or include wildcards \* to match sections of the path. You can also specify a special '\*' path that will match everything. Typically this would be used to load a 404 page.
+### queryParameters
+You can match against query parameters by specifying an array of query parameters. Ex: `queryParameters: ['queryParam1=true', 'queryParam2']`. This will check for an exact match on `queryParam1` and check for the existence of `queryParam2`.
 
-To match against the query you specify an array of query parameters. When you specify multiple options like a path and query parameters it matches against ALL of the options you specify.
+You can combine a path with queryParameters in your route. When you do this the route will only match if ALL options specified match.
 
-You can also specify a custom `matchesUrl()` function to do more complicated URL matching logic.
+### matchesUrl()
+If you need more control over your route you can override the `route.matchesUrl()` function and specify your own logic. This is useful if you need to check for an either or case.
 
-These are some examples.
-
+### Example routes
 ```js
 routes: {
-  route1: {path: '/example/path', module: 'info/infoView'}, // matches
-  route2: {path: '/example/*', module: 'info/infoView'}, // matches
-  route3: {path: '/example/path', queryParameters: ['queryParam2=example%20string'], module: 'info/infoView'}, // matches
-  route4: {queryParameters: ['queryParam1=true', 'queryParam2=example%20string'], module: 'info/infoView'}, // matches
-  route5: {path: '*', module: 'notFound/notFoundView'}, // matches everything - this route would typically be used to load a 404 page
-  route6: {path: '/example/*' queryParameters: ['queryParam3=false'], module: 'info/infoView'}, // doesn't match - the query parameter fails the match
-  route7: {matchesUrl: function matchesUrl() { return true; }, module: 'info/infoView'}, // matches - the `matchesUrl()` method will always return true in this case
+  // matches the exact path
+  route1: {path: '/example/path', module: 'info/infoView'},
+  
+  // matches using a wildcard
+  route2: {path: '/example/*', module: 'info/infoView'},
+  
+  // matches the exact path and one query parameter
+  route3: {path: '/example/path', queryParameters: ['queryParam2=example%20string'], module: 'info/infoView'},
+  
+  // matches both query parameters
+  route4: {queryParameters: ['queryParam1=true', 'queryParam2=example%20string'], module: 'info/infoView'},
+  
+  // doesn't match - the query parameter fails the match
+  route5: {path: '/example/*' queryParameters: ['queryParam3=false'], module: 'info/infoView'},
+  
+  // doesn't match - but would match a path of either '/some/route' or '/other/route'
+  route6: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/some/route'}) || router.testRoute(window.location.href, {path: '/other/route'})) ? true : false; }, module: 'info/infoView'},
+  
+  // matches everything - this route would typically be used to load a 404 page
+  route7: {path: '*', module: 'notFound/notFoundView'}
 }
 ```
 
-## API
+## Configuration
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
 
 Here's an example of loading and configuring the router followed by triggering the initial page load. This effectively runs your app.
@@ -47,17 +72,16 @@ Here's an example of loading and configuring the router followed by triggering t
 require(['router'], function(router) {
   router.config({
     routes: {
-      // root matches path = '/' or '/view-js'
-      root: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/'}) || router.testRoute(window.location.href, {path: '/view-js'})) ? true : false; }, module: 'info/infoView'},
-      api: {path: '/api', module: 'api/apiView'},
-      example: {path: '/example', module: 'example/exampleView'},
-      dev: {path: '/dev', module: 'dev/child/childView'},
-      notFound: {path: '*', module: 'notFound/NotFoundView'},
-
-      // You can't use these directly to load a route. They're used by sub-views for their `.matchesUrl()` method.
-      todoAll: {queryParameters: ['todoFilter=all']},
-      todoActive: {queryParameters: ['todoFilter=active']},
-      todoCompleted: {queryParameters: ['todoFilter=completed']}
+      // root matches the exact route '/'
+      root: {path: '/', module: 'info/infoView'},
+      // customer matches a path like '/customer/123'
+      customer: {path: '/customer/*', module: 'customer/customerView'},
+      // orders matches a path of '/orders' that also has a query parameter 'orderStatus=completed'
+      orders: {path: '/orders', queryParameters: ['orderStatus=completed'], module: 'orders/ordersView'},
+      // dev matches '/dev' or '/development'
+      dev: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/dev'}) || router.testRoute(window.location.href, {path: '/development'})) ? true : false; }, module: 'dev/devView'}},
+      // notFound matches everything which is used to load a 404 page
+      notFound: {path: '*', module: 'notFound/NotFoundView'}
     },
 
     routeLoadedCallback: function routeLoadedCallback(View) {
@@ -65,16 +89,18 @@ require(['router'], function(router) {
       body.innerHTML = null;
       body.appendChild(new View().render().outerEl);
     }
-  }).loadCurrentRoute();
+  });
+  
+  router.loadCurrentRoute();
 });
 ```
 
-Router properties:
+## Router Properties
 - `router.config()` - configure the router
 - `router.routes` - all defined routes
 - `router.routeLoadedCallback(Module)` - called when RequireJS finishes loading a module for a route
 - `router.loadCurrentRoute()` - triggers RequireJS to load the module for the current route
-- `router.currentRoute()` - the current route (ex: `{path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }}`)
+- `router.currentRoute()` - the current route - ex: `{path: '/', queryParameters: [], module: 'info/infoView', matchesUrl: function() {...}}`
 - `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
 - `router.testRoute(url, route)` - determines if the route matches the URL
 - `router.parseUrl(url)` - parses the url to get the path and search
@@ -113,19 +139,17 @@ You're done. The indexView is re-rendered with the header links updated and the 
 Here's an example router and view setup with the classic views.
 ```js
 router.config({
-  // Routes define the URI hash -> RequireJS module
   routes: {
-    // root matches path = '/' or '/view-js'
-    root: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/'}) || router.testRoute(window.location.href, {path: '/view-js'})) ? true : false; }, module: 'info/infoView'},
-    api: {path: '/api', module: 'api/apiView'},
-    example: {path: '/example', module: 'example/exampleView'},
-    dev: {path: '/dev', module: 'dev/child/childView'},
-    notFound: {path: '*', module: 'notFound/NotFoundView'},
-
-    // You can't use these directly to load a route. They're used by sub-views for their `.matchesUrl()` method.
-    todoAll: {queryParameters: ['todoFilter=all']},
-    todoActive: {queryParameters: ['todoFilter=active']},
-    todoCompleted: {queryParameters: ['todoFilter=completed']}
+    // root matches the exact route '/'
+    root: {path: '/', module: 'info/infoView'},
+    // customer matches a path like '/customer/123'
+    customer: {path: '/customer/*', module: 'customer/customerView'},
+    // orders matches a path of '/orders' that also has a query parameter 'orderStatus=completed'
+    orders: {path: '/orders', queryParameters: ['orderStatus=completed'], module: 'orders/ordersView'},
+    // dev matches '/dev' or '/development'
+    dev: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/dev'}) || router.testRoute(window.location.href, {path: '/development'})) ? true : false; }, module: 'dev/devView'}},
+    // notFound matches everything which is used to load a 404 page
+    notFound: {path: '*', module: 'notFound/NotFoundView'}
   },
 
   // The hashchange event handler calls your main view's render method
