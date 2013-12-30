@@ -5,10 +5,10 @@ A normal router has dependencies on every file it can route to and loads all of 
 
 ## Routes
 A route has 4 properties
-- `path` (string)
-- `searchParameters` (string array)
-- `matchesUrl()` function
-- `module` (string)
+- `path` (string) - the URL path
+- `searchParameters` (string array) - the URL search parameters
+- `matchesUrl()` function - tests the route to see if it matches the current URL
+- `module` (string) - the RequireJS module to load when the user navigates to this route
 
 A simple route object would looke like this `{path: '/example/path', module: 'info/infoView'}`. When you navigate to that path it will load that module.
 
@@ -57,7 +57,7 @@ routes: {
   route5: {path: '/example/*' queryParameters: ['queryParam3=false'], module: 'info/infoView'},
   
   // doesn't match - but would match a path of either '/some/route' or '/other/route'
-  route6: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/some/route'}) || router.testRoute(window.location.href, {path: '/other/route'})) ? true : false; }, module: 'info/infoView'},
+  route6: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/some/route'}) || router.testRoute({path: '/other/route'}); }, module: 'info/infoView'},
   
   // matches everything - this route would typically be used to load a 404 page
   route7: {path: '*', module: 'notFound/notFoundView'}
@@ -79,7 +79,7 @@ require(['router'], function(router) {
       // orders matches a path of '/orders' that also has a query parameter 'orderStatus=completed'
       orders: {path: '/orders', queryParameters: ['orderStatus=completed'], module: 'orders/ordersView'},
       // dev matches '/dev' or '/development'
-      dev: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/dev'}) || router.testRoute(window.location.href, {path: '/development'})) ? true : false; }, module: 'dev/devView'}},
+      dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
       // notFound matches everything which is used to load a 404 page
       notFound: {path: '*', module: 'notFound/NotFoundView'}
     },
@@ -98,11 +98,11 @@ require(['router'], function(router) {
 ## Router Properties
 - `router.config()` - configure the router
 - `router.routes` - all defined routes
-- `router.routeLoadedCallback(Module)` - called when RequireJS finishes loading a module for a route
+- `router.routeLoadedCallback(module)` - called when RequireJS finishes loading a module for a route
 - `router.loadCurrentRoute()` - triggers RequireJS to load the module for the current route
-- `router.testRoute(url, route)` - determines if the route matches the URL
-- `router.parseUrl(url)` - parses the url to get the path and query parameters
-- `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
+- `router.testRoute(route)` - test if the route path and query parameters match the current URL
+- `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls `router.loadCurrentRoute()`
+- `router.currentUrl()` - gets the current URL from the address bar. You can override this when unit testing.
 - `router.currentRoute()` - the current route - ex: `{path: '/', queryParameters: [], module: 'info/infoView', matchesUrl: function() {...}}`
 
 ## How to use
@@ -115,8 +115,8 @@ Here's an example ineraction with the example configuration from above:
 
 1. The user clicks a link in the header `<li><a href="#/api">APIs</a></li>`
 2. A hashchange event is triggered and is intercepted by the router which loads the `'api/apiView'` module
-3. The router calls your `router.routeLoadedCallback(Module)` with `ApiView` being passed in as the argument
-4. Your `router.routeLoadedCallback(Module)` callback renders the view which also renders it's parent view `indexView` and attaches it to the document
+3. The router calls your `router.routeLoadedCallback(module)` with `ApiView` being passed in as the argument
+4. Your `router.routeLoadedCallback(module)` callback renders the view which also renders it's parent view `indexView` and attaches it to the document
 
 You're done. The indexView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
 
@@ -130,8 +130,8 @@ Here's an example ineraction:
 3. `router.urlChangeEventHandler()` calls `indexView.render()` which draws the header, footer, and an empty main-content section. At this point the header has the "APIs" link marked as active `<li class="active"><a href="#/api">APIs</a></li>`.
 4. `indexView.render()` calls `router.loadCurrentRoute()`
 5. `router.loadCurrentRoute()` uses RequireJS to load the `'api/apiView'` module
-6. When the module finishes loading `router.routeLoadedCallback(Module)` is called with `ApiView` being passed in as the argument
-7. `router.routeLoadedCallback(Module)` creates a new instance of `ApiView`, renders it and attaches it to the indexView's main-content section
+6. When the module finishes loading `router.routeLoadedCallback(module)` is called with `ApiView` being passed in as the argument
+7. `router.routeLoadedCallback(module)` creates a new instance of `ApiView`, renders it and attaches it to the indexView's main-content section
 
 You're done. The indexView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
 
@@ -146,7 +146,7 @@ router.config({
     // orders matches a path of '/orders' that also has a query parameter 'orderStatus=completed'
     orders: {path: '/orders', queryParameters: ['orderStatus=completed'], module: 'orders/ordersView'},
     // dev matches '/dev' or '/development'
-    dev: {matchesUrl: function matchesUrl() { return (router.testRoute(window.location.href, {path: '/dev'}) || router.testRoute(window.location.href, {path: '/development'})) ? true : false; }, module: 'dev/devView'}},
+    dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
     // notFound matches everything which is used to load a 404 page
     notFound: {path: '*', module: 'notFound/NotFoundView'}
   },
@@ -157,11 +157,11 @@ router.config({
   },
 
   // This gets called when a RequireJS module finishes loading
-  routeLoadedCallback: function routeLoadedCallback(Module) {
+  routeLoadedCallback: function routeLoadedCallback(module) {
     // Attach the child view to the indexView's main-content section
     var mainContent = indexView.el.querySelector('main#content');
     mainContent.innerHTML = null;
-    mainContent.appendChild(new Module().render().el);
+    mainContent.appendChild(new module().render().el);
   }
 });
 

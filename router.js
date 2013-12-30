@@ -1,16 +1,13 @@
 // RequireJS Router.
 //
 // Author: Erik Ringsmuth
-// Version: 0.1.5
+// Version: 0.1.6
 // License: MIT
 
 /*global define, require, console*/
 /*jshint loopfunc: true*/
 define([], function() {
   'use strict';
-
-  // Cache parsed URLs
-  var parsedUrlCache = {};
 
   // There can only be one instance of the router
   var router = {
@@ -24,7 +21,7 @@ define([], function() {
     //     example: {path: '/example', module: 'example/exampleView'},
     //     notFound: {path: '*', module: 'notFound/NotFoundView'}
     //   },
-    //   routeLoadedCallback: function(Module) { /** create an instance of the view, render it, and attach it to the document */ }
+    //   routeLoadedCallback: function(module) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
     config: function config(properties) {
       // Copy properties from the config object
@@ -52,10 +49,10 @@ define([], function() {
         };
       }
 
-      // router.routeLoadedCallback(Module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
+      // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
       if (typeof(router.routeLoadedCallback) === 'undefined') {
         router.routeLoadedCallback = function routeLoadedCallback() {
-          console.log('`router.routeLoadedCallback(Module)` has not been implemented.');
+          console.log('`router.routeLoadedCallback(module)` has not been implemented.');
         };
       }
 
@@ -66,7 +63,7 @@ define([], function() {
         (function(route) {
           if (typeof(route.matchesUrl) === 'undefined') {
             route.matchesUrl = function matchesUrl() {
-              return router.testRoute(window.location.href, route);
+              return router.testRoute(route);
             };
           }
         })(router.routes[routeName]);
@@ -85,15 +82,15 @@ define([], function() {
       return router;
     },
 
-    // router.testRoute(url, route) - determines if the route matches the URL
-    testRoute: function testRoute(url, route) {
-      var urlProperties = router.parseUrl(url);
+    // router.testRoute(route) - determines if the route matches the current URL
+    testRoute: function testRoute(route) {
+      var urlProperties = parseUrl(router.currentUrl());
       var path = urlProperties.path;
       var search = urlProperties.search;
 
       // All checks are for fail cases. If nothing fails then we return true at the end.
       //
-      // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+      // Example URL = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string'
       // path = '/example/path'
       // search = '?queryParam1=true&queryParam2=example%20string'
       //
@@ -140,87 +137,9 @@ define([], function() {
       return true;
     },
 
-    // router.parseUrl(url) - parses the url to get the path and search
-    //
-    // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-    //
-    // The URL must contain the leading 'protocol://'. We can't rely on `window.location` because IE implemented it
-    // differently than other browsers.
-    parseUrl: function parseUrl(url) {
-      // Check the cache to see if we've already parsed this URL
-      if (typeof(parsedUrlCache[url]) !== 'undefined') {
-        return parsedUrlCache[url];
-      }
-
-      // The relative URI is everything after the third slash including the third slash
-      // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-      var relativeUri = '/' + url.split('/').splice(3).join('/');
-
-      // The path is everything in the relative URI up to the first ? or #
-      // Example path = '/other/path'
-      var path = relativeUri;
-      if (relativeUri.indexOf('?') !== -1 || relativeUri.indexOf('#') !== -1) {
-        path = relativeUri.split(/[\?#]/)[0];
-      }
-
-      // The hash is everything from the first # on
-      // Example hash = '#/example/path?queryParam1=true&queryParam2=example%20string'
-      var hash = '';
-      var hashIndex = relativeUri.indexOf('#');
-      if (hashIndex !== -1) {
-        hash = relativeUri.substring(hashIndex);
-      }
-
-      // The search is everything from the first ? up to but not including the first #
-      // Example search = '?queryParam3=false'
-      var search = '';
-      var relativeUriWithoutHash = relativeUri;
-      if (hashIndex !== -1) {
-        relativeUriWithoutHash = relativeUri.substring(0, hashIndex);
-      }
-      var searchIndex = relativeUriWithoutHash.indexOf('?');
-      if (searchIndex !== -1) {
-        search = relativeUriWithoutHash.substring(searchIndex);
-      }
-
-      // If it's a hash route we need to get the path and search from the hash
-      // Example isHashRoute = true
-      var isHashRoute = (hash.substring(0, 2) === '#/') ? true : false;
-      var isHashBangRoute = (hash.substring(0, 3) === '#!/') ? true : false;
-      if (isHashRoute || isHashBangRoute) {
-        var hashSearchParametersIndex = hash.indexOf('?');
-        if (hashSearchParametersIndex === -1) {
-          // There is no search string in the hash
-          search = '';
-          if (isHashRoute) {
-            path = hash.substring(1);
-          } else if (isHashBangRoute) {
-            path = hash.substring(2);
-          }
-        } else {
-          // There is a search string in the hash
-          // Example search = '?queryParam1=true&queryParam2=example%20string'
-          search = hash.substring(hashSearchParametersIndex);
-          if (isHashRoute) {
-            // Example path = '/example/path'
-            path = hash.substring(1, hashSearchParametersIndex);
-          } else if (isHashBangRoute) {
-            path = hash.substring(2, hashSearchParametersIndex);
-          }
-        }
-      }
-
-      // Remove trailing slash from the path for consistency
-      if (path.length !== 1 && path[path.length - 1] === '/') {
-        path = path.substring(0, path.length - 1);
-      }
-
-      // Cache the properties for this URL and return them
-      parsedUrlCache[url] = {
-        path: path,
-        search: search
-      };
-      return parsedUrlCache[url];
+    // router.currentUrl() - gets the current URL from the address bar. You can override this when unit testing.
+    currentUrl: function currentUrl() {
+      return window.location.href;
     },
 
     // router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
@@ -242,6 +161,96 @@ define([], function() {
       }
       return router;
     }
+  };
+
+  // Private variables and methods
+
+  // parseUrl(url) - parses the url to get the path and search
+  //
+  // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+  // returns {
+  //   path = '/example/path',
+  //   search = '?queryParam1=true&queryParam2=example%20string'
+  // }
+  //
+  // The URL must contain the leading 'protocol://'. We can't rely on `window.location.path` and `window.location.search`
+  // because IE implemented it differently than other browsers.
+  var parsedUrlCache = {};
+  var parseUrl = function parseUrl(url) {
+    // Check the cache to see if we've already parsed this URL
+    if (typeof(parsedUrlCache[url]) !== 'undefined') {
+      return parsedUrlCache[url];
+    }
+
+    // The relative URI is everything after the third slash including the third slash
+    // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+    var relativeUri = '/' + url.split('/').splice(3).join('/');
+
+    // The path is everything in the relative URI up to the first ? or #
+    // Example path = '/other/path'
+    var path = relativeUri;
+    if (relativeUri.indexOf('?') !== -1 || relativeUri.indexOf('#') !== -1) {
+      path = relativeUri.split(/[\?#]/)[0];
+    }
+
+    // The hash is everything from the first # on
+    // Example hash = '#/example/path?queryParam1=true&queryParam2=example%20string'
+    var hash = '';
+    var hashIndex = relativeUri.indexOf('#');
+    if (hashIndex !== -1) {
+      hash = relativeUri.substring(hashIndex);
+    }
+
+    // The search is everything from the first ? up to but not including the first #
+    // Example search = '?queryParam3=false'
+    var search = '';
+    var relativeUriWithoutHash = relativeUri;
+    if (hashIndex !== -1) {
+      relativeUriWithoutHash = relativeUri.substring(0, hashIndex);
+    }
+    var searchIndex = relativeUriWithoutHash.indexOf('?');
+    if (searchIndex !== -1) {
+      search = relativeUriWithoutHash.substring(searchIndex);
+    }
+
+    // If it's a hash route we need to get the path and search from the hash
+    // Example isHashRoute = true
+    var isHashRoute = (hash.substring(0, 2) === '#/') ? true : false;
+    var isHashBangRoute = (hash.substring(0, 3) === '#!/') ? true : false;
+    if (isHashRoute || isHashBangRoute) {
+      var hashSearchParametersIndex = hash.indexOf('?');
+      if (hashSearchParametersIndex === -1) {
+        // There is no search string in the hash
+        search = '';
+        if (isHashRoute) {
+          path = hash.substring(1);
+        } else if (isHashBangRoute) {
+          path = hash.substring(2);
+        }
+      } else {
+        // There is a search string in the hash
+        // Example search = '?queryParam1=true&queryParam2=example%20string'
+        search = hash.substring(hashSearchParametersIndex);
+        if (isHashRoute) {
+          // Example path = '/example/path'
+          path = hash.substring(1, hashSearchParametersIndex);
+        } else if (isHashBangRoute) {
+          path = hash.substring(2, hashSearchParametersIndex);
+        }
+      }
+    }
+
+    // Remove trailing slash from the path for consistency
+    if (path.length !== 1 && path[path.length - 1] === '/') {
+      path = path.substring(0, path.length - 1);
+    }
+
+    // Cache the properties for this URL and return them
+    parsedUrlCache[url] = {
+      path: path,
+      search: search
+    };
+    return parsedUrlCache[url];
   };
 
   // Return the router

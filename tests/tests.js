@@ -9,6 +9,18 @@
   });
 
   require(['router'], function(router) {
+    // Arrange
+    // These URLs will all have the same path and query parameters
+    var urls = [
+      'http://domain.com/example/path?queryParam1=true&queryParam2=example%20string',
+      'http://domain.com/example/path/?queryParam1=true&queryParam2=example%20string',
+      'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string',
+      'http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string',
+      'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string',
+      'http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string'
+    ];
+
+    // Test that these routes all match or fail correctly against all of the URLs
     var routes = {
       route1: {path: '/example/path', module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match the path.'},
       route2: {path: '/example/*', module: 'info/infoView', testShouldMatch: true, testFailMessage: 'should match the path with a wildcard.'},
@@ -21,52 +33,26 @@
 
     var body = document.querySelector('body');
 
-    var runTest = function testRoute(windowLocation, route) {
-      var passed = router.testRoute(windowLocation, route) === route.testShouldMatch;
-      var message = 'Path: "' + route.path + '", Query Parameters: ' + JSON.stringify(route.queryParameters);
-      if (passed) {
-        body.innerHTML += '<br />Test succeeded - ' + message;
-      } else {
-        body.innerHTML += '<br /><span style="color: red;">Test failed - ' + message + '. - ' + route.testFailMessage + '</span>';
-      }
-    };
-
+    // Override `router.currentUrl()` to return the test URL instead of the `window.location.href`
     var url = '';
+    router.currentUrl = function() { return url; };
 
-    url = 'http://domain.com/example/path?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Regular path and query parameters<br />Uri: ' + url;
-    for (var i in routes) {
-      runTest(url, routes[i]);
-    }
+    // Act
+    // Test every URL against every route
+    for (var urlIndex in urls) {
+      url = urls[urlIndex];
+      body.innerHTML += '<br /><br />URL: ' + url;
+      for (var routeIndex in routes) {
+        var route = routes[routeIndex];
+        var message = 'Path: "' + route.path + '", Query Parameters: ' + JSON.stringify(route.queryParameters);
 
-    url = 'http://domain.com/example/path/?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Regular path and query parameters with trailing path slash<br />Uri: ' + url;
-    for (i in routes) {
-      runTest(url, routes[i]);
-    }
-
-    url = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Hash path and query parameters<br />Uri: ' + url;
-    for (i in routes) {
-      runTest(url, routes[i]);
-    }
-
-    url = 'http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Hash bang path and query parameters<br />Uri: ' + url;
-    for (i in routes) {
-      runTest(url, routes[i]);
-    }
-
-    url = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Regular path and query parameters with hash path and query parameters<br />Uri: ' + url;
-    for (i in routes) {
-      runTest(url, routes[i]);
-    }
-
-    url = 'http://domain.com/other/path?queryParam3=false#!/example/path?queryParam1=true&queryParam2=example%20string';
-    body.innerHTML += '<br /><br />Regular path and query parameters with hash bang path and query parameters<br />Uri: ' + url;
-    for (i in routes) {
-      runTest(url, routes[i]);
+        // Assert
+        if (router.testRoute(route) === route.testShouldMatch) {
+          body.innerHTML += '<br />Test succeeded - ' + message;
+        } else {
+          body.innerHTML += '<br /><span style="color: red;">Test failed - ' + message + '. - ' + route.testFailMessage + '</span>';
+        }
+      }
     }
   });
 })();
