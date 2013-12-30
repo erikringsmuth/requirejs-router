@@ -20,10 +20,10 @@ These URLs will all resolve to this path and set of query parameters.
 - `queryParameters = ['queryParam1=true', 'queryParam2=example%20string']`
 
 URLs
-- http://domain.com/example/path?queryParam1=true&queryParam2=example%20string
-- http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string
-- http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string
-- http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string
+- `http://domain.com/example/path?queryParam1=true&queryParam2=example%20string`
+- `http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string`
+- `http://domain.com/#!/example/path?queryParam1=true&queryParam2=example%20string`
+- `http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string`
 
 The 4th example ignores the normal path and query parameters since it has a hash path.
 
