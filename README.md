@@ -100,11 +100,10 @@ require(['router'], function(router) {
 - `router.routes` - all defined routes
 - `router.routeLoadedCallback(Module)` - called when RequireJS finishes loading a module for a route
 - `router.loadCurrentRoute()` - triggers RequireJS to load the module for the current route
-- `router.currentRoute()` - the current route - ex: `{path: '/', queryParameters: [], module: 'info/infoView', matchesUrl: function() {...}}`
-- `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
 - `router.testRoute(url, route)` - determines if the route matches the URL
-- `router.parseUrl(url)` - parses the url to get the path and search
-- `router.routes.*.matchesUrl()` - each route has this method to determine if the route matches the URL
+- `router.parseUrl(url)` - parses the url to get the path and query parameters
+- `router.urlChangeEventHandler()` - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
+- `router.currentRoute()` - the current route - ex: `{path: '/', queryParameters: [], module: 'info/infoView', matchesUrl: function() {...}}`
 
 ## How to use
 Let's go over the case where your site has a consistent layout (header, footer, etc.) that you want rendered on every page. Let's call this the `indexView`. When you click a tab in the header it routes to a different page. You need to re-render the `indexView` to show which tab is now active. There are two main ways to do this. If you use views that support parent views similar to .NET master pages then the set up is simple since you can route directly to the child view. If you use a more classic style of views like Backbone.js then you need a hook to render the parent view before rendering the child view. Let's go over the easy case first.
