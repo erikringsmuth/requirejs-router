@@ -24,36 +24,9 @@ define([], function() {
     //   routeLoadedCallback: function(module) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
     config: function config(properties) {
-      // Copy properties from the config object
+      // Copy properties from the config object - this extends the router
       for (var property in properties) {
         router[property] = properties[property];
-      }
-
-      // router.routes - all defined routes
-      //
-      // Example
-      // {
-      //   root: {path: '/', module: 'info/infoView'},
-      //   api: {path: '/api', module: 'api/apiView'},
-      //   example: {path: '/example', module: 'example/exampleView'},
-      //   notFound: {path: '*', module: 'notFound/NotFoundView'}
-      // }
-      if (typeof(router.routes) === 'undefined') {
-        router.routes = {};
-      }
-
-      // router.urlChangeEventHandler() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
-      if (typeof(router.urlChangeEventHandler) === 'undefined') {
-        router.urlChangeEventHandler = function urlChangeEventHandler() {
-          router.loadCurrentRoute();
-        };
-      }
-
-      // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
-      if (typeof(router.routeLoadedCallback) === 'undefined') {
-        router.routeLoadedCallback = function routeLoadedCallback() {
-          console.log('`router.routeLoadedCallback(module)` has not been implemented.');
-        };
       }
 
       // router.routes.*.matchesUrl() - each route has this method to determine if the route matches the URL
@@ -79,6 +52,31 @@ define([], function() {
         window.attachEvent('popstate', router.urlChangeEventHandler);
       }
 
+      return router;
+    },
+
+    // router.routes - all defined routes
+    //
+    // Example
+    // {
+    //   root: {path: '/', module: 'info/infoView'},
+    //   api: {path: '/api', module: 'api/apiView'},
+    //   example: {path: '/example', module: 'example/exampleView'},
+    //   notFound: {path: '*', module: 'notFound/NotFoundView'}
+    // }
+    routes: {},
+
+    // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
+    routeLoadedCallback: function routeLoadedCallback() {
+      console.log('`router.routeLoadedCallback(module)` has not been implemented.');
+    },
+
+    // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
+    loadCurrentRoute: function loadCurrentRoute() {
+      var route = router.currentRoute();
+      if (route !== null) {
+        require([route.module], router.routeLoadedCallback);
+      }
       return router;
     },
 
@@ -137,6 +135,11 @@ define([], function() {
       return true;
     },
 
+    // router.urlChangeEventHandler() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
+    urlChangeEventHandler: function urlChangeEventHandler() {
+      router.loadCurrentRoute();
+    },
+
     // router.currentUrl() - gets the current URL from the address bar. You can override this when unit testing.
     currentUrl: function currentUrl() {
       return window.location.href;
@@ -151,15 +154,6 @@ define([], function() {
         }
       }
       return null;
-    },
-
-    // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
-    loadCurrentRoute: function loadCurrentRoute() {
-      var route = router.currentRoute();
-      if (route !== null) {
-        require([route.module], router.routeLoadedCallback);
-      }
-      return router;
     }
   };
 
