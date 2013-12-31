@@ -1,9 +1,12 @@
-/*global define, describe, it, expect*/
+/*global define*/
 /*jshint loopfunc: true*/
-define(['router'], function(router) {
+define([
+  'jasmineAmd',
+  'router'
+], function(jasmine, router) {
   'use strict';
 
-  describe('Configuring the router', function() {
+  jasmine.describe('Configuring the router', function() {
     router.config({
       routes: {
         route1: {path: '/example/path', module: 'info/infoView'},
@@ -11,14 +14,14 @@ define(['router'], function(router) {
       }
     });
 
-    it('should add a `matchesUrl()` method to every route', function() {
+    jasmine.it('should add a `matchesUrl()` method to every route', function() {
       for (var route in router.routes) {
-        expect(router.routes[route].matchesUrl).toBeDefined();
+        jasmine.expect(router.routes[route].matchesUrl).toBeDefined();
       }
     });
   });
 
-  describe('Calling testRoute()', function() {
+  jasmine.describe('Calling testRoute()', function() {
     // Arrange
     // These URLs will all have the same path and query parameters
     var urls = [
@@ -50,14 +53,14 @@ define(['router'], function(router) {
     for (var routeIndex in routes) {
       var route = routes[routeIndex];
 
-      describe('on route ' + JSON.stringify({path: route.path, queryParameters: route.queryParameters}), function() {
+      jasmine.describe('on route ' + JSON.stringify({path: route.path, queryParameters: route.queryParameters}), function() {
         for (var urlIndex in urls) {
           url = urls[urlIndex];
 
-          describe('and URL "' + url, function() {
-            it(route.expectMessage, function() {
+          jasmine.describe('and URL "' + url, function() {
+            jasmine.it(route.expectMessage, function() {
               var result = router.testRoute(route);
-              expect(result).toEqual(route.expectMatch);
+              jasmine.expect(result).toEqual(route.expectMatch);
             });
           });
         }

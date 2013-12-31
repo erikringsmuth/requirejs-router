@@ -8,7 +8,8 @@
     paths: {
       'jasmine': 'tests/lib/jasmine-2.0.0/jasmine',
       'jasmine-html': 'tests/lib/jasmine-2.0.0/jasmine-html',
-      'boot': 'tests/lib/jasmine-2.0.0/boot'
+      'boot': 'tests/lib/jasmine-2.0.0/boot',
+      'jasmineAmd': 'tests/lib/jasmine-2.0.0/jasmineAmd'
     },
     shim: {
       'jasmine': {
