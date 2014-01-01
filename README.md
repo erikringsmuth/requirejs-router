@@ -106,9 +106,9 @@ require(['router'], function(router) {
 - `router.currentRoute()` - the current route - ex: `{path: '/', queryParameters: [], module: 'info/infoView', matchesUrl: function() {...}}`
 
 ## How to use
-Let's go over the case where your site has a consistent layout (header, footer, etc.) that you want rendered on every page. Let's call this the `indexView`. When you click a tab in the header it routes to a different page. You need to re-render the `indexView` to show which tab is now active. There are two main ways to do this. If you use views that support parent views similar to .NET master pages then the set up is simple since you can route directly to the child view. If you use a more classic style of views like Backbone.js then you need a hook to render the parent view before rendering the child view. Let's go over the easy case first.
+Let's go over the case where your site has a consistent layout (header, footer, etc.) that you want rendered on every page. Let's call this the `layoutView`. When you click a tab in the header it routes to a different page. You need to re-render the `layoutView` to show which tab is now active. There are two main ways to do this. If you use views that support layout views similar to .NET master pages then the set up is simple since you can route directly to the child view. If you use a more classic style of views like Backbone.js then you need a hook to render the layout view before rendering the child view. Let's go over the easy case first.
 
-### Views that support parent views
+### Views that support layout views
 Example framework: [view.js](http://erikringsmuth.github.io/view-js/)
 
 Here's an example ineraction with the example configuration from above:
@@ -116,24 +116,24 @@ Here's an example ineraction with the example configuration from above:
 1. The user clicks a link in the header `<li><a href="#/api">APIs</a></li>`
 2. A hashchange event is triggered and is intercepted by the router which loads the `'api/apiView'` module
 3. The router calls your `router.routeLoadedCallback(module)` with `ApiView` being passed in as the argument
-4. Your `router.routeLoadedCallback(module)` callback renders the view which also renders it's parent view `indexView` and attaches it to the document
+4. Your `router.routeLoadedCallback(module)` callback renders the view which also renders it's `layoutView` and attaches it to the document
 
-You're done. The indexView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
+You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
 
-### Views that do not support parent views
+### Views that do not support layout views
 Example framework: [Backbone.js](http://backbonejs.org/)
 
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/api">APIs</a></li>`
 2. A hashchange event is triggered and is intercepted by `router.urlChangeEventHandler()`
-3. `router.urlChangeEventHandler()` calls `indexView.render()` which draws the header, footer, and an empty main-content section. At this point the header has the "APIs" link marked as active `<li class="active"><a href="#/api">APIs</a></li>`.
-4. `indexView.render()` calls `router.loadCurrentRoute()`
+3. `router.urlChangeEventHandler()` calls `layoutView.render()` which draws the header, footer, and an empty main-content section. At this point the header has the "APIs" link marked as active `<li class="active"><a href="#/api">APIs</a></li>`.
+4. `layoutView.render()` calls `router.loadCurrentRoute()`
 5. `router.loadCurrentRoute()` uses RequireJS to load the `'api/apiView'` module
 6. When the module finishes loading `router.routeLoadedCallback(module)` is called with `ApiView` being passed in as the argument
-7. `router.routeLoadedCallback(module)` creates a new instance of `ApiView`, renders it and attaches it to the indexView's main-content section
+7. `router.routeLoadedCallback(module)` creates a new instance of `ApiView`, renders it and attaches it to the layoutView's main-content section
 
-You're done. The indexView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
+You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
 
 Here's an example router and view setup with the classic views.
 ```js
@@ -153,20 +153,20 @@ router.config({
 
   // The hashchange event handler calls your main view's render method
   urlChangeEventHandler: function urlChangeEventHandler() {
-    indexView.render.call(indexView);
+    layoutView.render.call(layoutView);
   },
 
   // This gets called when a RequireJS module finishes loading
   routeLoadedCallback: function routeLoadedCallback(module) {
-    // Attach the child view to the indexView's main-content section
-    var mainContent = indexView.el.querySelector('main#content');
+    // Attach the child view to the layoutView's main-content section
+    var mainContent = layoutView.el.querySelector('main#content');
     mainContent.innerHTML = '';
     mainContent.appendChild(new module().render().el);
   }
 });
 
 // Your view's `render()` method draws the header, footer, and an empty main-content section which the `router.routeLoadedCallback()` method populates
-indexView.render = function render() {
+layoutView.render = function render() {
   this.el.innerHTML = this.template({model: this.model});
   this.router.loadCurrentRoute();
   return this;
