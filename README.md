@@ -109,7 +109,7 @@ require(['router'], function(router) {
 Let's go over the case where your site has a consistent layout (header, footer, etc.) that you want rendered on every page. Let's call this the `layoutView`. When you click a tab in the header it routes to a different page. You need to re-render the `layoutView` to show which tab is now active. There are two main ways to do this. If you use views that support layout views similar to .NET master pages then the set up is simple since you can route directly to the child view. If you use a more classic style of views like Backbone.js then you need a hook to render the layout view before rendering the child view. Let's go over the easy case first.
 
 ### Views that support layout views
-Example framework: [view.js](http://erikringsmuth.github.io/view-js/)
+Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
 
 Here's an example ineraction with the example configuration from above:
 
@@ -174,7 +174,7 @@ layoutView.render = function render() {
 ```
 
 ## Demo Site
-The RequireJS Router was written alongside [view.js](https://github.com/erikringsmuth/view-js). The site's source is available in the [gh-pages branch of view-js](https://github.com/erikringsmuth/view-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/view-js/blob/gh-pages/js/main.js). Both view.js and the RequireJS Router are licensed under MIT.
+The RequireJS Router was written alongside [nex-js](https://github.com/erikringsmuth/nex-js). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
 ## Running Tests
 Open `/tests/SpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
