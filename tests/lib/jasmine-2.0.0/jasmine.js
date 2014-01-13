@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013 Pivotal Labs
+Copyright (c) 2008-2014 Pivotal Labs
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -366,7 +366,7 @@ getJasmineRequireObj().Spec = function(j$) {
   Spec.pendingSpecExceptionMessage = "=> marked Pending";
 
   Spec.isPendingSpecException = function(e) {
-    return e.toString().indexOf(Spec.pendingSpecExceptionMessage) !== -1;
+    return !!(e && e.toString && e.toString().indexOf(Spec.pendingSpecExceptionMessage) !== -1);
   };
 
   return Spec;
@@ -1129,9 +1129,13 @@ getJasmineRequireObj().DelayedFunctionScheduler = function() {
 getJasmineRequireObj().ExceptionFormatter = function() {
   function ExceptionFormatter() {
     this.message = function(error) {
-      var message = error.name +
-        ': ' +
-        error.message;
+      var message = '';
+
+      if (error.name && error.message) {
+        message += error.name + ': ' + error.message;
+      } else {
+        message += error.toString() + ' thrown';
+      }
 
       if (error.fileName || error.sourceURL) {
         message += " in " + (error.fileName || error.sourceURL);
