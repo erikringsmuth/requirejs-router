@@ -1,7 +1,7 @@
 ## RequireJS Router
 A scalable, lazy loading, AMD router.
 
-A normal router has dependencies on every file it can route to and loads all of your files up front. The RequireJS Router scales since the user only loads the Javascript for the pages they're navigating to.
+Other frameworks load all of your app's Javascript up front. You can optimize your site by compiling it down to one file but that still doesn't solve the problem. The RequireJS Router lazy loads your modules as you navigate to the route. You're site could contain 10mb of Javascript and HTML templates and it would only load the 20kb needed for the current page.
 
 ## Routes
 A route has 4 properties
@@ -174,7 +174,7 @@ layoutView.render = function render() {
 ```
 
 ## Demo Site
-The RequireJS Router was written alongside [nex-js](https://github.com/erikringsmuth/nex-js). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
+The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js) and [/js/routes.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/routes.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
 ## Running Tests
 Open `/tests/AmdSpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
