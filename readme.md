@@ -177,4 +177,4 @@ layoutView.render = function render() {
 The RequireJS Router was written alongside [nex-js](https://github.com/erikringsmuth/nex-js). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
 ## Running Tests
-Open `/tests/SpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
+Open `/tests/AmdSpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
