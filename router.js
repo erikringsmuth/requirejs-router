@@ -104,19 +104,24 @@ define([], function() {
       var urlProperties = parseUrl(router.currentUrl());
       var path = urlProperties.path;
       var search = urlProperties.search;
+      var urlQueryParameters = urlProperties.queryParameters;
 
       // All checks are for fail cases. If nothing fails then we return true at the end.
       //
       // Example URL = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string'
       // path = '/example/path'
       // search = '?queryParam1=true&queryParam2=example%20string'
+      // urlQueryParameters = {
+      //   queryParam1: 'true',
+      //   queryParam2: 'example&20string'
+      // }
       //
       // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
       
       // Check the path. If the route path is undefined, '*', or an exact match then the route path is considered a match.
       if (typeof(route.path) !== 'undefined' && route.path !== '*' && route.path !== path) {
         // Look for wildcards
-        if (route.path.indexOf('*') === -1) {
+        if (route.path.indexOf('*') === -1 && route.path.indexOf(':') === -1) {
           // No wildcards and we already made sure it wasn't an exact match so the test fails
           return false;
         }
@@ -135,18 +140,47 @@ define([], function() {
         // Check equality of each path segment
         for (var i in routePathSegments) {
           // The path segments must be equal or the route must specify a wildcard segment '*'
-          if (routePathSegments[i] !== pathSegments[i] && routePathSegments[i] !== '*') {
+          var routeSegment = routePathSegments[i];
+          if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
             // The path segment wasn't the same string and it wasn't a wildcard
             return false;
           }
         }
       }
 
-      // Check the query parameters
-      for (var queryParameterIndex in route.queryParameters) {
-        // If the search string contains the queryParameter string then it's a match, otherwise the test fails
-        if (search.indexOf(route.queryParameters[queryParameterIndex]) === -1) {
+      // Check each of the route's query parameters against each of the URL's query parameters
+      // route.queryParameters look like this ['param1=true', 'param2=example%20string']
+      // urlQueryParameters look like this queryParameters: { queryParam1: 'true', queryParam2: 'example&20string' }
+      for (var routeParameterIndex in route.queryParameters) {
+        var routeQueryParameter = route.queryParameters[routeParameterIndex];
+
+        // Fail quickly, if the search string doesn't contain the queryParameter then it's not a match
+        if (search.indexOf(routeQueryParameter) === -1) {
           return false;
+        }
+
+        // Thorough test, does the route query parameter exist and match exactly
+        for (var urlParameterName in urlQueryParameters) {
+          var urlQueryParameter = urlQueryParameters[urlParameterName];
+          if (routeQueryParameter.indexOf('=') === -1) {
+            // A route query parameter without a value (ex: ?param1)
+
+            // Check if the urlQueryParameters have the routeQueryParameter and make sure the urlQueryParameter doesn't define a value
+            if (!urlQueryParameters.hasOwnProperty(routeQueryParameter) || urlQueryParameters[urlQueryParameter] !== undefined) {
+              return false;
+            }
+          } else {
+            // A routeQueryParameter with a value (ex: ?param2=somevalue)
+            var routeParameterParts = routeQueryParameter.split('=');
+            var routeParameterName = routeParameterParts[0];
+            // The value can also contain '=' (ex: ?param2=some=value)
+            var routeParameterValue = routeParameterParts.splice(1).join('=');
+
+            // Check if the urlQueryParameters has the routeQueryParameter and it's value
+            if (urlQueryParameters[routeParameterName] !== routeParameterValue) {
+              return false;
+            }
+          }
         }
       }
 
@@ -178,12 +212,16 @@ define([], function() {
 
   // Private variables and methods
 
-  // parseUrl(url) - parses the url to get the path and search
+  // parseUrl(url) - parses the url to get the path, search, and query parameters
   //
   // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
   // returns {
-  //   path = '/example/path',
-  //   search = '?queryParam1=true&queryParam2=example%20string'
+  //   path: '/example/path',
+  //   search: '?queryParam1=true&queryParam2=example%20string',
+  //   queryParameters: {
+  //     queryParam1: 'true',
+  //     queryParam2: 'example&20string'
+  //   }
   // }
   //
   // The URL must contain the leading 'protocol://'. We can't rely on `window.location.path` and `window.location.search`
@@ -258,10 +296,30 @@ define([], function() {
       path = path.substring(0, path.length - 1);
     }
 
+    // Parse the search to get the query parameters
+    var queryParameters = {};
+    if (search.length > 1) {
+      // remove the leading ? and split on &
+      var searchParts = search.substring(1).split('&');
+      for (var parameterIndex in searchParts) {
+        var parameter = searchParts[parameterIndex];
+        if (parameter.indexOf('=') === -1) {
+          // a query parameter without a value (ex: ?param1)
+          queryParameters[parameter] = undefined;
+        } else {
+          // a query parameter with a value (ex: ?param2=somevalue)
+          var parameterParts = parameter.split('=');
+          // The value can also contain '=' (ex: ?param2=some=value)
+          queryParameters[parameterParts[0]] = parameterParts.splice(1).join('=');
+        }
+      }
+    }
+
     // Cache the properties for this URL and return them
     parsedUrlCache[url] = {
       path: path,
-      search: search
+      search: search,
+      queryParameters: queryParameters
     };
     return parsedUrlCache[url];
   };
