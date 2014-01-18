@@ -182,7 +182,10 @@ define([], function() {
       var pathSegments = path.split('/');
 
       // Example routePathSegments = ['', 'example', '*']
-      var routePathSegments = route.path.split('/');
+      var routePathSegments = [];
+      if (route && route.path) {
+        routePathSegments = route.path.split('/');
+      }
 
       // Get path arguments
       // URL '/customer/123'

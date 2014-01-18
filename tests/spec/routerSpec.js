@@ -23,78 +23,141 @@ define([
     });
   });
 
-  describe('Calling urlPath(url) should return "/example/path"', function() {
-    // These URLs will all have the same path
-    var urls = [
-      'http://domain.com/example/path?queryParam=true',
-      'http://domain.com/#/example/path?queryParam=true',
-      'http://domain.com/#!/example/path?queryParam=true',
-      'http://domain.com/example/path?queryParam2=false#notHashPath',
-      'http://domain.com/other/path?queryParam2=false#/example/path?queryParam1=true',
-      'http://domain.com/other/path?queryParam2=false#!/example/path?queryParam1=true',
-      'http://domain.com/other/path?queryParam2=false#!/example/path?queryParam1=true#secondHash'
-    ];
-
-    for (var i in urls) {
-      (function(url){
-        it('for URL ' + url, function() {
-          expect(router.urlPath(url)).toEqual('/example/path');
-        });
-      })(urls[i]);
-    }
+  describe('router.loadCurrentRoute()', function() {
+    it('should call router.routeLoadedCallback() when it\'s done loading the route\'s module');
   });
 
-  describe('Calling testRoute(route)', function() {
-    it('with route {path: "/example/path"} and URL "http://domain.com/example/path?queryParam=true" should return true', function() {
+  describe('router.currentRoute()', function() {
+    it('should return the first route that matches the URL');
+  });
+
+  describe('router.urlChangeEventHandler()', function() {
+    it('should call loadCurrentRoute()');
+  });
+
+  describe('router.currentUrl()', function() {
+    it('should return window.location.href');
+  });
+
+  describe('router.urlPath(url)', function() {
+    it('should return the path on a url without a hash or search', function() {
+      var url = 'http://domain.com/example/path';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the path on a url with a search', function() {
+      var url = 'http://domain.com/example/path?queryParam=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the path on a url with a hash', function() {
+      var url = 'http://domain.com/example/path#hash';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the hash path if it exists', function() {
+      var url = 'http://domain.com/#/example/path';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should correctly ignore the query parameters when a hash path exists', function() {
+      var url = 'http://domain.com/#/example/path?queryParam=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the hashbang path if it exists', function() {
+      var url = 'http://domain.com/#!/example/path?queryParam=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should correctly ignore the query parameters when a hashbang path exists', function() {
+      var url = 'http://domain.com/#!/example/path?queryParam=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should correctly ignore the hash and return the path if it\'s not a hash path', function() {
+      var url = 'http://domain.com/example/path?queryParam2=false#notHashPath';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the hash path when there is both a path and a hash path', function() {
+      var url = 'http://domain.com/other/path?queryParam2=false#/example/path?queryParam1=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should return the hashbang path when there is both a path and a hashbang path', function() {
+      var url = 'http://domain.com/other/path?queryParam2=false#!/example/path?queryParam1=true';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+
+    it('should ignore an additional hash after a hashpath', function() {
+      var url = 'http://domain.com/other/path?queryParam2=false#!/example/path?queryParam1=true#secondHash';
+      var result = router.urlPath(url);
+      expect(result).toEqual('/example/path');
+    });
+  });
+
+  describe('router.testRoute(route)', function() {
+    it('should return true on an exact match', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/example/path'});
       expect(result).toEqual(true);
     });
     
-    it('with route {path: "/example/*"} and URL "http://domain.com/example/path?queryParam=true" should return true', function() {
+    it('should return true when matching with a wildcard', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/example/*'});
       expect(result).toEqual(true);
     });
     
-    it('with route {path: "/:patharg/path"} and URL "http://domain.com/example/path?queryParam=true" should return true', function() {
+    it('should return true when matching with a path argument', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/:patharg/path'});
       expect(result).toEqual(true);
     });
     
-    it('with route {path: "/*/:patharg"} and URL "http://domain.com/example/path?queryParam=true" should return true', function() {
+    it('should return true when matching on a combination of wildcards and path arguments', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/*/:patharg'});
       expect(result).toEqual(true);
     });
     
-    it('with route {path: "*"} and URL "http://domain.com/example/path?queryParam=true" should return true', function() {
+    it('should always return true when matching on "*"', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '*'});
       expect(result).toEqual(true);
     });
     
-    it('with route {path: "/example/route/"} and URL "http://domain.com/example/path?queryParam=true" should return false', function() {
+    it('should not match when one path has a trailing \'/\' but the other doesn\'t', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/example/route/'});
       expect(result).toEqual(false);
     });
     
-    it('with route {path: "/example/route/longer"} and URL "http://domain.com/example/path?queryParam=true" should return false', function() {
+    it('should return false if the route path does not have the same number of path segments as the URL path', function() {
       router.currentUrl = function() { return 'http://domain.com/example/path?queryParam=true'; };
       var result = router.testRoute({path: '/example/route/longer'});
       expect(result).toEqual(false);
     });
     
-    it('with route {path: "/other/route"} and URL "http://domain.com/other/path?queryParam2=false#/example/path?queryParam1=true" should return false', function() {
+    it('should ignore the real path and use the hash path if it exists', function() {
       router.currentUrl = function() { return 'http://domain.com/other/path?queryParam2=false#/example/path?queryParam1=true'; };
       var result = router.testRoute({path: '/other/route'});
       expect(result).toEqual(false);
     });
   });
 
-  describe('Calling routeArguments(route, url)', function() {
+  describe('router.routeArguments(route, url)', function() {
     it('should parse string query parameters', function() {
       var route = {path: '/example/path'};
       var url = 'http://domain.com/example/path?queryParam=example%20string';
@@ -158,6 +221,20 @@ define([
       expect(result.id).toEqual(456);
       expect(result.queryParam).toEqual(true);
       expect(result.queryParam2).toEqual('some string');
+    });
+
+    it('should parse the query parameters if no route is specified', function() {
+      var route = null;
+      var url = 'http://domain.com/?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(true);
+    });
+
+    it('should parse the query parameters if no route path is specified', function() {
+      var route = {};
+      var url = 'http://domain.com/?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(true);
     });
   });
 });
