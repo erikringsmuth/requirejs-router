@@ -28,6 +28,12 @@
 define([], function() {
   'use strict';
 
+  // Private static variables
+  var cachedUrlPaths = {},
+      hasBeenInitialized = false;
+
+  // Public interface
+
   // There can only be one instance of the router
   var router = {
     // router.config() - configure the router
@@ -48,44 +54,44 @@ define([], function() {
         router[property] = properties[property];
       }
 
+      // Check and configure each route
       // router.routes.*.matchesUrl() - each route has this method to determine if the route matches the URL
       //
       // You can override this with your own function to do a custom matcher.
       for (var routeName in router.routes) {
-        (function(route) {
-          if (typeof(route.matchesUrl) === 'undefined') {
+        var route = router.routes[routeName];
+        if (typeof(route.path) === 'undefined') {
+          throw 'Every route must have a path';
+        }
+        if (typeof(route.matchesUrl) === 'undefined') {
+          (function(route) {
             route.matchesUrl = function matchesUrl() {
               return router.testRoute(route);
             };
-          }
-        })(router.routes[routeName]);
+          })(route);
+        }
       }
 
-      // Set up the window hashchange and popstate event listeners
-      if (window.addEventListener) {
-        window.addEventListener('hashchange', router.urlChangeEventHandler, false);
-        window.addEventListener('popstate', router.urlChangeEventHandler, false);
-      } else {
-        // IE 8 and lower
-        window.attachEvent('hashchange', router.urlChangeEventHandler);
-        window.attachEvent('popstate', router.urlChangeEventHandler);
+      // Set up the window hashchange and popstate event listeners the first time the router is configured
+      if (!hasBeenInitialized) {
+        if (window.addEventListener) {
+          window.addEventListener('hashchange', router.urlChangeEventHandler, false);
+          window.addEventListener('popstate', router.urlChangeEventHandler, false);
+        } else {
+          // IE 8 and lower
+          window.attachEvent('hashchange', router.urlChangeEventHandler);
+          window.attachEvent('popstate', router.urlChangeEventHandler);
+        }
+        hasBeenInitialized = true;
       }
 
       return router;
     },
 
     // router.routes - all defined routes
-    //
-    // Example
-    // {
-    //   root: {path: '/', module: 'info/infoView'},
-    //   api: {path: '/api', module: 'api/apiView'},
-    //   example: {path: '/example', module: 'example/exampleView'},
-    //   notFound: {path: '*', module: 'notFound/NotFoundView'}
-    // }
     routes: {},
 
-    // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one parameter which is the module that was loaded.
+    // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one argument which is the module that was loaded.
     routeLoadedCallback: function routeLoadedCallback() {
       console.log('`router.routeLoadedCallback(module)` has not been implemented.');
     },
@@ -99,93 +105,15 @@ define([], function() {
       return router;
     },
 
-    // router.testRoute(route) - determines if the route matches the current URL
-    testRoute: function testRoute(route) {
-      var urlProperties = parseUrl(router.currentUrl());
-      var path = urlProperties.path;
-      var search = urlProperties.search;
-      var urlQueryParameters = urlProperties.queryParameters;
-
-      // All checks are for fail cases. If nothing fails then we return true at the end.
-      //
-      // Example URL = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string'
-      // path = '/example/path'
-      // search = '?queryParam1=true&queryParam2=example%20string'
-      // urlQueryParameters = {
-      //   queryParam1: 'true',
-      //   queryParam2: 'example&20string'
-      // }
-      //
-      // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
-      
-      // Check the path. If the route path is undefined, '*', or an exact match then the route path is considered a match.
-      if (typeof(route.path) !== 'undefined' && route.path !== '*' && route.path !== path) {
-        // Look for wildcards
-        if (route.path.indexOf('*') === -1 && route.path.indexOf(':') === -1) {
-          // No wildcards and we already made sure it wasn't an exact match so the test fails
-          return false;
-        }
-
-        // Example pathSegments = ['', example', 'path']
-        var pathSegments = path.split('/');
-
-        // Example routePathSegments = ['', 'example', '*']
-        var routePathSegments = route.path.split('/');
-
-        // There must be the same number of path segments or it isn't a match
-        if (pathSegments.length !== routePathSegments.length) {
-          return false;
-        }
-
-        // Check equality of each path segment
-        for (var i in routePathSegments) {
-          // The path segments must be equal or the route must specify a wildcard segment '*'
-          var routeSegment = routePathSegments[i];
-          if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
-            // The path segment wasn't the same string and it wasn't a wildcard
-            return false;
-          }
+    // router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
+    currentRoute: function currentRoute() {
+      for (var i in router.routes) {
+        var route = router.routes[i];
+        if (route.matchesUrl()) {
+          return route;
         }
       }
-
-      // Check each of the route's query parameters against each of the URL's query parameters
-      // route.queryParameters look like this ['param1=true', 'param2=example%20string']
-      // urlQueryParameters look like this queryParameters: { queryParam1: 'true', queryParam2: 'example&20string' }
-      for (var routeParameterIndex in route.queryParameters) {
-        var routeQueryParameter = route.queryParameters[routeParameterIndex];
-
-        // Fail quickly, if the search string doesn't contain the queryParameter then it's not a match
-        if (search.indexOf(routeQueryParameter) === -1) {
-          return false;
-        }
-
-        // Thorough test, does the route query parameter exist and match exactly
-        for (var urlParameterName in urlQueryParameters) {
-          var urlQueryParameter = urlQueryParameters[urlParameterName];
-          if (routeQueryParameter.indexOf('=') === -1) {
-            // A route query parameter without a value (ex: ?param1)
-
-            // Check if the urlQueryParameters have the routeQueryParameter and make sure the urlQueryParameter doesn't define a value
-            if (!urlQueryParameters.hasOwnProperty(routeQueryParameter) || urlQueryParameters[urlQueryParameter] !== undefined) {
-              return false;
-            }
-          } else {
-            // A routeQueryParameter with a value (ex: ?param2=somevalue)
-            var routeParameterParts = routeQueryParameter.split('=');
-            var routeParameterName = routeParameterParts[0];
-            // The value can also contain '=' (ex: ?param2=some=value)
-            var routeParameterValue = routeParameterParts.splice(1).join('=');
-
-            // Check if the urlQueryParameters has the routeQueryParameter and it's value
-            if (urlQueryParameters[routeParameterName] !== routeParameterValue) {
-              return false;
-            }
-          }
-        }
-      }
-
-      // Nothing failed. The route matches the URL.
-      return true;
+      return null;
     },
 
     // router.urlChangeEventHandler() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
@@ -198,130 +126,171 @@ define([], function() {
       return window.location.href;
     },
 
-    // router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
-    currentRoute: function currentRoute() {
-      for (var i in router.routes) {
-        var route = router.routes[i];
-        if (route.matchesUrl()) {
-          return route;
+    // router.testRoute(route) - determines if the route matches the current URL
+    testRoute: function testRoute(route) {
+      // This algorithm tries to succeed or fail as quickly as possible.
+      //
+      // Example path = '/example/path'
+      // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
+      var path = router.urlPath(router.currentUrl());
+
+      // If the route path is '*', or an exact match then the route path is considered a match
+      if (route.path === '*' || route.path === path) {
+        return true;
+      }
+
+      // Look for wildcards
+      if (route.path.indexOf('*') === -1 && route.path.indexOf(':') === -1) {
+        // No wildcards and we already made sure it wasn't an exact match so the test fails
+        return false;
+      }
+
+      // Example pathSegments = ['', example', 'path']
+      var pathSegments = path.split('/');
+
+      // Example routePathSegments = ['', 'example', '*']
+      var routePathSegments = route.path.split('/');
+
+      // There must be the same number of path segments or it isn't a match
+      if (pathSegments.length !== routePathSegments.length) {
+        return false;
+      }
+
+      // Check equality of each path segment
+      for (var i in routePathSegments) {
+        // The path segments must be equal, be a wildcard segment '*', or be a path parameter like ':id'
+        var routeSegment = routePathSegments[i];
+        if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
+          // The path segment wasn't the same string and it wasn't a wildcard or parameter
+          return false;
         }
       }
-      return null;
-    }
-  };
 
-  // Private variables and methods
+      // Nothing failed. The route matches the URL.
+      return true;
+    },
 
-  // parseUrl(url) - parses the url to get the path, search, and query parameters
-  //
-  // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-  // returns {
-  //   path: '/example/path',
-  //   search: '?queryParam1=true&queryParam2=example%20string',
-  //   queryParameters: {
-  //     queryParam1: 'true',
-  //     queryParam2: 'example&20string'
-  //   }
-  // }
-  //
-  // The URL must contain the leading 'protocol://'. We can't rely on `window.location.path` and `window.location.search`
-  // because IE implemented it differently than other browsers.
-  var parsedUrlCache = {};
-  var parseUrl = function parseUrl(url) {
-    // Check the cache to see if we've already parsed this URL
-    if (typeof(parsedUrlCache[url]) !== 'undefined') {
-      return parsedUrlCache[url];
-    }
+    // router.routeArguments(url, route) - parse the url to get the route arguments
+    routeArguments: function routeArguments(url, route) {
+      // // All checks are for fail cases. If nothing fails then we return true at the end.
+      // //
+      // // Example URL = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string'
+      // // path = '/example/path'
+      // //
+      // // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
+      // var path = router.urlPath(router.currentUrl());
 
-    // The relative URI is everything after the third slash including the third slash
-    // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-    var relativeUri = '/' + url.split('/').splice(3).join('/');
+      // // Check the path. If the route path is undefined, '*', or an exact match then the route path is considered a match.
+      // if (typeof(route.path) !== 'undefined' && route.path !== '*' && route.path !== path) {
+      //   // Look for wildcards
+      //   if (route.path.indexOf('*') === -1 && route.path.indexOf(':') === -1) {
+      //     // No wildcards and we already made sure it wasn't an exact match so the test fails
+      //     return false;
+      //   }
 
-    // The path is everything in the relative URI up to the first ? or #
-    // Example path = '/other/path'
-    var path = relativeUri;
-    if (relativeUri.indexOf('?') !== -1 || relativeUri.indexOf('#') !== -1) {
-      path = relativeUri.split(/[\?#]/)[0];
-    }
+      //   // Example pathSegments = ['', example', 'path']
+      //   var pathSegments = path.split('/');
 
-    // The hash is everything from the first # on
-    // Example hash = '#/example/path?queryParam1=true&queryParam2=example%20string'
-    var hash = '';
-    var hashIndex = relativeUri.indexOf('#');
-    if (hashIndex !== -1) {
-      hash = relativeUri.substring(hashIndex);
-    }
+      //   // Example routePathSegments = ['', 'example', '*']
+      //   var routePathSegments = route.path.split('/');
 
-    // The search is everything from the first ? up to but not including the first #
-    // Example search = '?queryParam3=false'
-    var search = '';
-    var relativeUriWithoutHash = relativeUri;
-    if (hashIndex !== -1) {
-      relativeUriWithoutHash = relativeUri.substring(0, hashIndex);
-    }
-    var searchIndex = relativeUriWithoutHash.indexOf('?');
-    if (searchIndex !== -1) {
-      search = relativeUriWithoutHash.substring(searchIndex);
-    }
+      //   // There must be the same number of path segments or it isn't a match
+      //   if (pathSegments.length !== routePathSegments.length) {
+      //     return false;
+      //   }
 
-    // If it's a hash route we need to get the path and search from the hash
-    // Example isHashRoute = true
-    var isHashRoute = (hash.substring(0, 2) === '#/') ? true : false;
-    var isHashBangRoute = (hash.substring(0, 3) === '#!/') ? true : false;
-    if (isHashRoute || isHashBangRoute) {
-      var hashSearchParametersIndex = hash.indexOf('?');
-      if (hashSearchParametersIndex === -1) {
-        // There is no search string in the hash
-        search = '';
-        if (isHashRoute) {
+      //   // Check equality of each path segment
+      //   for (var i in routePathSegments) {
+      //     // The path segments must be equal or the route must specify a wildcard segment '*'
+      //     var routeSegment = routePathSegments[i];
+      //     if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
+      //       // The path segment wasn't the same string and it wasn't a wildcard
+      //       return false;
+      //     }
+      //   }
+      // }
+
+      // // Check each of the route's query parameters against each of the URL's query parameters
+      // // route.queryParameters look like this ['param1=true', 'param2=example%20string']
+      // // urlQueryParameters look like this queryParameters: { queryParam1: 'true', queryParam2: 'example&20string' }
+      // for (var routeParameterIndex in route.queryParameters) {
+      //   var routeQueryParameter = route.queryParameters[routeParameterIndex];
+
+      //   // Fail quickly, if the search string doesn't contain the queryParameter then it's not a match
+      //   if (search.indexOf(routeQueryParameter) === -1) {
+      //     return false;
+      //   }
+
+      //   // Thorough test, does the route query parameter exist and match exactly
+      //   for (var urlParameterName in urlQueryParameters) {
+      //     var urlQueryParameter = urlQueryParameters[urlParameterName];
+      //     if (routeQueryParameter.indexOf('=') === -1) {
+      //       // A route query parameter without a value (ex: ?param1)
+
+      //       // Check if the urlQueryParameters have the routeQueryParameter and make sure the urlQueryParameter doesn't define a value
+      //       if (!urlQueryParameters.hasOwnProperty(routeQueryParameter) || urlQueryParameters[urlQueryParameter] !== undefined) {
+      //         return false;
+      //       }
+      //     } else {
+      //       // A routeQueryParameter with a value (ex: ?param2=somevalue)
+      //       var routeParameterParts = routeQueryParameter.split('=');
+      //       var routeParameterName = routeParameterParts[0];
+      //       // The value can also contain '=' (ex: ?param2=some=value)
+      //       var routeParameterValue = routeParameterParts.splice(1).join('=');
+
+      //       // Check if the urlQueryParameters has the routeQueryParameter and it's value
+      //       if (urlQueryParameters[routeParameterName] !== routeParameterValue) {
+      //         return false;
+      //       }
+      //     }
+      //   }
+      // }
+
+      // // Nothing failed. The route matches the URL.
+      // return true;
+    },
+
+    // urlPath(url) - parses the url to get the path
+    //
+    // This will return the hash path if it exists or return the real path if no hash path exists
+    //
+    // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+    // path = '/example/path'
+    //
+    // Note: The URL must contain the protocol like 'http(s)://'
+    urlPath: function urlPath(url) {
+      // Check the cache to see if we've already parsed this URL
+      if (typeof(cachedUrlPaths[url]) !== 'undefined') {
+        return cachedUrlPaths[url];
+      }
+
+      // The relative URI is everything after the third slash including the third slash
+      // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+      var relativeUri = '/' + url.split('/').splice(3).join('/');
+
+      // The path is everything in the relative URI up to the first ? or #
+      // Example path = '/other/path'
+      var path = relativeUri.split(/[\?#]/)[0];
+
+      // The hash is everything from the first # up to the the search starting with ? if it exists
+      // Example hash = '#/example/path'
+      var hashIndex = relativeUri.indexOf('#');
+      if (hashIndex !== -1) {
+        var hash = relativeUri.substring(hashIndex).split('?')[0];
+        if (hash.substring(0, 2) === '#/') {
+          // Hash path
           path = hash.substring(1);
-        } else if (isHashBangRoute) {
+        } else if (hash.substring(0, 3) === '#!/') {
+          // Hashbang path
           path = hash.substring(2);
         }
-      } else {
-        // There is a search string in the hash
-        // Example search = '?queryParam1=true&queryParam2=example%20string'
-        search = hash.substring(hashSearchParametersIndex);
-        if (isHashRoute) {
-          // Example path = '/example/path'
-          path = hash.substring(1, hashSearchParametersIndex);
-        } else if (isHashBangRoute) {
-          path = hash.substring(2, hashSearchParametersIndex);
-        }
       }
-    }
 
-    // Remove trailing slash from the path for consistency
-    if (path.length !== 1 && path[path.length - 1] === '/') {
-      path = path.substring(0, path.length - 1);
-    }
+      // Cache the path for this URL
+      cachedUrlPaths[url] = path;
 
-    // Parse the search to get the query parameters
-    var queryParameters = {};
-    if (search.length > 1) {
-      // remove the leading ? and split on &
-      var searchParts = search.substring(1).split('&');
-      for (var parameterIndex in searchParts) {
-        var parameter = searchParts[parameterIndex];
-        if (parameter.indexOf('=') === -1) {
-          // a query parameter without a value (ex: ?param1)
-          queryParameters[parameter] = undefined;
-        } else {
-          // a query parameter with a value (ex: ?param2=somevalue)
-          var parameterParts = parameter.split('=');
-          // The value can also contain '=' (ex: ?param2=some=value)
-          queryParameters[parameterParts[0]] = parameterParts.splice(1).join('=');
-        }
-      }
+      return path;
     }
-
-    // Cache the properties for this URL and return them
-    parsedUrlCache[url] = {
-      path: path,
-      search: search,
-      queryParameters: queryParameters
-    };
-    return parsedUrlCache[url];
   };
 
   // Return the router
