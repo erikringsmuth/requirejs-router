@@ -60,8 +60,8 @@ define([], function() {
       // You can override this with your own function to do a custom matcher.
       for (var routeName in router.routes) {
         var route = router.routes[routeName];
-        if (typeof(route.path) === 'undefined') {
-          throw 'Every route must have a path';
+        if (typeof(route.path) === 'undefined' && typeof(route.matchesUrl) === 'undefined') {
+          throw 'Every route must have a path or matchesUrl()';
         }
         if (typeof(route.matchesUrl) === 'undefined') {
           (function(route) {
@@ -226,6 +226,10 @@ define([], function() {
       }
 
       var queryParameters = search.substring(1).split('&');
+      // split() on an empty string has a strange behavior of returning [''] instead of []
+      if (queryParameters.length === 1 && queryParameters[0] === '') {
+        queryParameters = [];
+      }
       for (var i in queryParameters) {
         var queryParameter = queryParameters[i];
         var queryParameterParts = queryParameter.split('=');

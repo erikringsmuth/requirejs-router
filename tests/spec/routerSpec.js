@@ -295,5 +295,12 @@ define([
       var result = router.routeArguments(route, url);
       expect(result.queryParam).toEqual(true);
     });
+
+    it('should not add an empty string value when the search is empty', function() {
+      var route = {};
+      var url = 'http://domain.com/';
+      var result = router.routeArguments(route, url);
+      expect(result.hasOwnProperty('')).toBeFalsy();
+    });
   });
 });
