@@ -191,6 +191,12 @@ define([
       var result = router.testRoute({path: '/example(/:id)'});
       expect(result).toEqual(true);
     });
+
+    it('should return true when matching on multiple optional paths', function() {
+      router.currentUrl = function() { return 'http://domain.com/example/path'; };
+      var result = router.testRoute({path: '/(example)(/:id)'});
+      expect(result).toEqual(true);
+    });
   });
 
   describe('router.routeArguments(route, url)', function() {
@@ -306,6 +312,12 @@ define([
       var route = {path: '/example(/:id)'};
       var result = router.routeArguments(route, url);
       expect(result.id).toBeUndefined();
+    });
+
+    it('should parse arguments out of multiple optional paths', function() {
+      router.currentUrl = function() { return 'http://domain.com/example/123'; };
+      var result = router.testRoute({path: '/(example)(/:id)'});
+      expect(result.id).toEqual(123);
     });
   });
 });
