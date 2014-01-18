@@ -183,7 +183,7 @@ layoutView.render = function render() {
 ```
 
 ## Demo Site
-The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js) and [/js/routes.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/routes.js). Both nex-js and the RequireJS Router are licensed under MIT.
+The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
 ## Running Tests
 Open `/tests/AmdSpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
