@@ -214,48 +214,6 @@ define([
       var result = router.testRoute({path: '/other/route'});
       expect(result).toEqual(false);
     });
-
-    // it('should return true on a route with an optional path where the optional path doesn\'t exist', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example'; };
-    //   var result = router.testRoute({path: '/example(/path)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true on a route with an optional path where the full path exists', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example/path'; };
-    //   var result = router.testRoute({path: '/example(/path)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true on a route with an optional path with a trailing slash where the optional path doesn\'t exist', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example'; };
-    //   var result = router.testRoute({path: '/example/(path)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true on a route with an optional path with a trailing slash where the full path exists', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example/path'; };
-    //   var result = router.testRoute({path: '/example/(path)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true on a route with an optional path argument where the optional path doesn\'t exist', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example'; };
-    //   var result = router.testRoute({path: '/example(/:id)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true on a route with an optional path argument where the full path exists', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example/path'; };
-    //   var result = router.testRoute({path: '/example(/:id)'});
-    //   expect(result).toEqual(true);
-    // });
-
-    // it('should return true when matching on multiple optional paths', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example/path'; };
-    //   var result = router.testRoute({path: '/(example)(/:id)'});
-    //   expect(result).toEqual(true);
-    // });
   });
 
   describe('router.routeArguments(route, url)', function() {
@@ -337,46 +295,5 @@ define([
       var result = router.routeArguments(route, url);
       expect(result.queryParam).toEqual(true);
     });
-
-    // it('should parse the path arguments when an optional path exists', function() {
-    //   var route = {path: '/example(/path)'};
-    //   var url = 'http://domain.com/example?queryParam=true';
-    //   var result = router.routeArguments(route, url);
-    //   expect(result.queryParam).toEqual(true);
-    // });
-
-    // it('should parse the path arguments when an optional path exists', function() {
-    //   var route = {path: '/example/(path)'};
-    //   var url = 'http://domain.com/example?queryParam=true';
-    //   var result = router.routeArguments(route, url);
-    //   expect(result.queryParam).toEqual(true);
-    // });
-
-    // it('should parse the path arguments in an optional path', function() {
-    //   var url = 'http://domain.com/example/123';
-    //   var route = {path: '/example(/:id)'};
-    //   var result = router.routeArguments(route, url);
-    //   expect(result.id).toEqual(123);
-    // });
-
-    // it('should parse the path arguments in an optional path with a trailing slash', function() {
-    //   var url = 'http://domain.com/example/123';
-    //   var route = {path: '/example/(:id)'};
-    //   var result = router.routeArguments(route, url);
-    //   expect(result.id).toEqual(123);
-    // });
-
-    // it('should not populate the optional path argument if it doesn\'t exist', function() {
-    //   var url = 'http://domain.com/example';
-    //   var route = {path: '/example(/:id)'};
-    //   var result = router.routeArguments(route, url);
-    //   expect(result.id).toBeUndefined();
-    // });
-
-    // it('should parse arguments out of multiple optional paths', function() {
-    //   router.currentUrl = function() { return 'http://domain.com/example/123'; };
-    //   var result = router.testRoute({path: '/(example)(/:id)'});
-    //   expect(result.id).toEqual(123);
-    // });
   });
 });

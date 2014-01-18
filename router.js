@@ -1,6 +1,6 @@
-// RequireJS Router.
+// RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.1.8
+// Version: 0.2.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -187,7 +187,7 @@ define([], function() {
         routePathSegments = route.path.split('/');
       }
 
-      // Get path arguments
+      // Get path variables
       // URL '/customer/123'
       // and route `{path: '/customer/:id'}`
       // gets id = '123'
