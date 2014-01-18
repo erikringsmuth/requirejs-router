@@ -41,9 +41,9 @@ define([], function() {
     // Example
     // router.config({
     //   routes: {
-    //     root: {path: '/', module: 'info/infoView'},
+    //     root: {path: '/', module: 'home/homeView'},
     //     api: {path: '/api', module: 'api/apiView'},
-    //     example: {path: '/example', module: 'example/exampleView'},
+    //     example: {path: '/customer/:id', module: 'customer/customerView'},
     //     notFound: {path: '*', module: 'notFound/NotFoundView'}
     //   },
     //   routeLoadedCallback: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
@@ -108,7 +108,7 @@ define([], function() {
       return router;
     },
 
-    // router.currentRoute() - the current route (ex: {path: '/', module: 'info/infoView', matchesUrl: function() { /** Returns true or false */ }})
+    // router.currentRoute() - the current route (ex: {path: '/', module: 'home/homeView', matchesUrl: function() { /** Returns true or false */ }})
     currentRoute: function currentRoute() {
       for (var i in router.routes) {
         var route = router.routes[i];
