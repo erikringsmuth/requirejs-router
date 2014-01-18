@@ -11,11 +11,12 @@ define([
   describe('Configuring the router', function() {
     router.config({
       routes: {
-        route1: {path: '/some/path'}
+        route1: {path: '/example/path'},
+        route2: {path: '/second/path'}
       }
     });
 
-    it('should add a `matchesUrl()` method to every route', function() {
+    it('should add a matchesUrl() method to every route', function() {
       for (var route in router.routes) {
         expect(router.routes[route].matchesUrl).toBeDefined();
       }
@@ -90,6 +91,73 @@ define([
       router.currentUrl = function() { return 'http://domain.com/other/path?queryParam2=false#/example/path?queryParam1=true'; };
       var result = router.testRoute({path: '/other/route'});
       expect(result).toEqual(false);
+    });
+  });
+
+  describe('Calling routeArguments(route, url)', function() {
+    it('should parse string query parameters', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/example/path?queryParam=example%20string';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual('example string');
+    });
+
+    it('should parse boolean query parameters', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/example/path?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(true);
+    });
+
+    it('should parse number query parameters', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/example/path?queryParam=12.34';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(12.34);
+    });
+
+    it('should get the query parameter from the hash path if it exists', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/other/path?queryParam=wrong#!/example/path?queryParam=correct';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual('correct');
+    });
+
+    it('should correctly get a query param with an equals sign in the value', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/other/path?queryParam=wrong#!/example/path?queryParam=some=text';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual('some=text');
+    });
+
+    it('should get the query param if it\'s followed by a hash', function() {
+      var route = {path: '/example/path'};
+      var url = 'http://domain.com/other/path?queryParam=true#hash';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(true);
+    });
+
+    it('should parse string path parameters', function() {
+      var route = {path: '/person/:name'};
+      var url = 'http://domain.com/person/jon?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.name).toEqual('jon');
+    });
+
+    it('should parse number path parameters', function() {
+      var route = {path: '/customer/:id'};
+      var url = 'http://domain.com/customer/123?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.id).toEqual(123);
+    });
+
+    it('should parse complicated URLs', function() {
+      var route = {path: '/customer/:id'};
+      var url = 'http://domain.com/customer/123?queryParam=false#!/customer/456?queryParam=true&queryParam2=some%20string';
+      var result = router.routeArguments(route, url);
+      expect(result.id).toEqual(456);
+      expect(result.queryParam).toEqual(true);
+      expect(result.queryParam2).toEqual('some string');
     });
   });
 });

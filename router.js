@@ -46,7 +46,7 @@ define([], function() {
     //     example: {path: '/example', module: 'example/exampleView'},
     //     notFound: {path: '*', module: 'notFound/NotFoundView'}
     //   },
-    //   routeLoadedCallback: function(module) { /** create an instance of the view, render it, and attach it to the document */ }
+    //   routeLoadedCallback: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
     config: function config(properties) {
       // Copy properties from the config object - this extends the router
@@ -91,7 +91,7 @@ define([], function() {
     // router.routes - all defined routes
     routes: {},
 
-    // router.routeLoadedCallback(module) - Called when RequireJS finishes loading a module for a route. This takes one argument which is the module that was loaded.
+    // router.routeLoadedCallback(module, routeArguments) - Called when RequireJS finishes loading a module for a route
     routeLoadedCallback: function routeLoadedCallback() {
       console.log('`router.routeLoadedCallback(module)` has not been implemented.');
     },
@@ -100,7 +100,10 @@ define([], function() {
     loadCurrentRoute: function loadCurrentRoute() {
       var route = router.currentRoute();
       if (route !== null) {
-        require([route.module], router.routeLoadedCallback);
+        var url = router.currentUrl();
+        require([route.module], function(module) {
+          router.routeLoadedCallback.call(router, module, router.routeArguments(route, url));
+        });
       }
       return router;
     },
@@ -170,84 +173,79 @@ define([], function() {
       return true;
     },
 
-    // router.routeArguments(url, route) - parse the url to get the route arguments
-    routeArguments: function routeArguments(url, route) {
-      // // All checks are for fail cases. If nothing fails then we return true at the end.
-      // //
-      // // Example URL = 'http://domain.com/#/example/path?queryParam1=true&queryParam2=example%20string'
-      // // path = '/example/path'
-      // //
-      // // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
-      // var path = router.urlPath(router.currentUrl());
+    // router.routeArguments(route, url) - parse the url to get the route arguments
+    routeArguments: function routeArguments(route, url) {
+      var args = {};
+      var path = router.urlPath(url);
 
-      // // Check the path. If the route path is undefined, '*', or an exact match then the route path is considered a match.
-      // if (typeof(route.path) !== 'undefined' && route.path !== '*' && route.path !== path) {
-      //   // Look for wildcards
-      //   if (route.path.indexOf('*') === -1 && route.path.indexOf(':') === -1) {
-      //     // No wildcards and we already made sure it wasn't an exact match so the test fails
-      //     return false;
-      //   }
+      // Example pathSegments = ['', example', 'path']
+      var pathSegments = path.split('/');
 
-      //   // Example pathSegments = ['', example', 'path']
-      //   var pathSegments = path.split('/');
+      // Example routePathSegments = ['', 'example', '*']
+      var routePathSegments = route.path.split('/');
 
-      //   // Example routePathSegments = ['', 'example', '*']
-      //   var routePathSegments = route.path.split('/');
+      // Get path arguments
+      // URL '/customer/123'
+      // and route `{path: '/customer/:id'}`
+      // gets id = '123'
+      for (var segmentIndex in routePathSegments) {
+        var routeSegment = routePathSegments[segmentIndex];
+        if (routeSegment.charAt(0) === ':') {
+          args[routeSegment.substring(1)] = pathSegments[segmentIndex];
+        }
+      }
 
-      //   // There must be the same number of path segments or it isn't a match
-      //   if (pathSegments.length !== routePathSegments.length) {
-      //     return false;
-      //   }
+      // Get the query parameter values
+      // The search is the query parameters including the leading '?'
+      var searchIndex = url.indexOf('?');
+      var search = '';
+      if (searchIndex !== -1) {
+        search = url.substring(searchIndex);
+        var hashIndex = search.indexOf('#');
+        if (hashIndex !== -1) {
+          search = search.substring(0, hashIndex);
+        }
+      }
+      // If it's a hash URL we need to get the search from the hash
+      var hashPathIndex = url.indexOf('#/');
+      var hashBangPathIndex = url.indexOf('#!/');
+      if (hashPathIndex !== -1 || hashBangPathIndex !== -1) {
+        var hash = '';
+        if (hashPathIndex !== -1) {
+          hash = url.substring(hashPathIndex);
+        } else {
+          hash = url.substring(hashBangPathIndex);
+        }
+        searchIndex = hash.indexOf('?');
+        if (searchIndex !== -1) {
+          search = hash.substring(searchIndex);
+        }
+      }
 
-      //   // Check equality of each path segment
-      //   for (var i in routePathSegments) {
-      //     // The path segments must be equal or the route must specify a wildcard segment '*'
-      //     var routeSegment = routePathSegments[i];
-      //     if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
-      //       // The path segment wasn't the same string and it wasn't a wildcard
-      //       return false;
-      //     }
-      //   }
-      // }
+      var queryParameters = search.substring(1).split('&');
+      for (var i in queryParameters) {
+        var queryParameter = queryParameters[i];
+        var queryParameterParts = queryParameter.split('=');
+        args[queryParameterParts[0]] = queryParameterParts.splice(1).join('=');
+      }
 
-      // // Check each of the route's query parameters against each of the URL's query parameters
-      // // route.queryParameters look like this ['param1=true', 'param2=example%20string']
-      // // urlQueryParameters look like this queryParameters: { queryParam1: 'true', queryParam2: 'example&20string' }
-      // for (var routeParameterIndex in route.queryParameters) {
-      //   var routeQueryParameter = route.queryParameters[routeParameterIndex];
+      // Parse the arguments into unescaped strings, numbers, or booleans
+      for (var arg in args) {
+        var value = args[arg];
+        if (value === 'true') {
+          args[arg] = true;
+        } else if (value === 'false') {
+          args[arg] = false;
+        } else if (!isNaN(value) && value !== '') {
+          // numeric
+          args[arg] = +value;
+        } else {
+          // string
+          args[arg] = decodeURIComponent(value);
+        }
+      }
 
-      //   // Fail quickly, if the search string doesn't contain the queryParameter then it's not a match
-      //   if (search.indexOf(routeQueryParameter) === -1) {
-      //     return false;
-      //   }
-
-      //   // Thorough test, does the route query parameter exist and match exactly
-      //   for (var urlParameterName in urlQueryParameters) {
-      //     var urlQueryParameter = urlQueryParameters[urlParameterName];
-      //     if (routeQueryParameter.indexOf('=') === -1) {
-      //       // A route query parameter without a value (ex: ?param1)
-
-      //       // Check if the urlQueryParameters have the routeQueryParameter and make sure the urlQueryParameter doesn't define a value
-      //       if (!urlQueryParameters.hasOwnProperty(routeQueryParameter) || urlQueryParameters[urlQueryParameter] !== undefined) {
-      //         return false;
-      //       }
-      //     } else {
-      //       // A routeQueryParameter with a value (ex: ?param2=somevalue)
-      //       var routeParameterParts = routeQueryParameter.split('=');
-      //       var routeParameterName = routeParameterParts[0];
-      //       // The value can also contain '=' (ex: ?param2=some=value)
-      //       var routeParameterValue = routeParameterParts.splice(1).join('=');
-
-      //       // Check if the urlQueryParameters has the routeQueryParameter and it's value
-      //       if (urlQueryParameters[routeParameterName] !== routeParameterValue) {
-      //         return false;
-      //       }
-      //     }
-      //   }
-      // }
-
-      // // Nothing failed. The route matches the URL.
-      // return true;
+      return args;
     },
 
     // urlPath(url) - parses the url to get the path
