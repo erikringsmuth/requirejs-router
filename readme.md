@@ -36,16 +36,19 @@ If you need more control over your route you can override the `route.matchesUrl(
 ```js
 routes: {
   // matches an exact path
-  route1: {path: '/home', module: 'home/homeView'},
+  home: {path: '/home', module: 'home/homeView'},
   
   // matches using a wildcard
-  route2: {path: '/customer/*', module: 'customer/customerView'},
+  customer: {path: '/customer/*', module: 'customer/customerView'},
   
   // matches using a path variable
-  route2: {path: '/customer/:id', module: 'customer/customerView'},
+  order: {path: '/orders/:id', module: 'order/orderView'},
   
+  // matches '/dev' or '/development'
+  dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
+
   // matches everything
-  route7: {path: '*', module: 'notFound/notFoundView'}
+  notFound: {path: '*', module: 'notFound/notFoundView'}
 }
 ```
 
@@ -88,17 +91,11 @@ Here's an example of loading and configuring the router followed by triggering t
 require(['router'], function(router) {
   router.config({
     routes: {
-      // root matches the exact route '/'
-      root: {path: '/', module: 'home/homeView'},
+      // home matches the exact route '/'
+      home: {path: '/', module: 'home/homeView'},
 
       // customer matches a path like '/customer/123'
       customer: {path: '/customer/:id', module: 'customer/customerView'},
-
-      // orders matches a path like '/orders/123'
-      orders: {path: '/orders/*', module: 'orders/ordersView'},
-
-      // dev matches '/dev' or '/development'
-      dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
 
       // notFound matches everything which is used to load a 404 page
       notFound: {path: '*', module: 'notFound/NotFoundView'}
@@ -151,17 +148,11 @@ Here's an example router and view setup with the classic views.
 ```js
 router.config({
   routes: {
-    // root matches the exact route '/'
-    root: {path: '/', module: 'home/homeView'},
+    // home matches the exact route '/'
+    home: {path: '/', module: 'home/homeView'},
 
     // customer matches a path like '/customer/123'
     customer: {path: '/customer/:id', module: 'customer/customerView'},
-
-    // orders matches a path like '/orders/123'
-    orders: {path: '/orders/*', module: 'orders/ordersView'},
-
-    // dev matches '/dev' or '/development'
-    dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
 
     // notFound matches everything which is used to load a 404 page
     notFound: {path: '*', module: 'notFound/NotFoundView'}
