@@ -127,7 +127,7 @@ Here's an example ineraction with the example configuration from above:
 
 1. The user clicks a link in the header `<li><a href="#/api">APIs</a></li>`
 2. A hashchange event is triggered and is intercepted by the router which loads the `'api/apiView'` module
-3. The router calls your `router.routeLoadedCallback(module, routeArguments)` with `ApiView` being passed in as the argument
+3. The router calls your `router.routeLoadedCallback(module, routeArguments)` with `ApiView` being passed in as the module
 4. Your `router.routeLoadedCallback(module, routeArguments)` callback renders the `ApiView` which also renders it's `layoutView` and attaches it to the document
 
 You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
@@ -142,7 +142,7 @@ Here's an example ineraction:
 3. Override `router.urlChangeEventHandler()` to call `layoutView.render()` which draws your header, footer, and an empty main-content section. At this point the header has the "APIs" link marked as active `<li class="active"><a href="#/api">APIs</a></li>`.
 4. `layoutView.render()` calls `router.loadCurrentRoute()`
 5. `router.loadCurrentRoute()` uses RequireJS to load the `'api/apiView'` module
-6. When the module finishes loading `router.routeLoadedCallback(module, routeArguments)` is called with `ApiView` being passed in as the argument
+6. When the module finishes loading `router.routeLoadedCallback(module, routeArguments)` is called with `ApiView` being passed in as the module
 7. `router.routeLoadedCallback(module, routeArguments)` creates a new instance of `ApiView`, renders it and attaches it to the layoutView's main-content section
 
 You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `ApiView`.
