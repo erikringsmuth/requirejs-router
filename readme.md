@@ -1,9 +1,11 @@
 ## RequireJS Router
 A scalable, lazy loading, AMD router.
 
-Other JS routers load all of your app's Javascript up front. You can optimize your site by compiling it down to one file but that doesn't solve the scale problem. The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.
+The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.
 
-Here's an example `main.js` that uses the RequireJS Router to run your app.
+## Configuration
+
+Here's an example `main.js` using the RequireJS Router to run your app.
 ```js
 define([], function() {
   'use strict';
@@ -19,6 +21,7 @@ define([], function() {
   // Load the router
   require(['router'], function(router) {
     router.config({
+      // Define all of your routes here
       routes: {
         // matches an exact path
         home: {path: '/home', module: 'home/homeView'},
