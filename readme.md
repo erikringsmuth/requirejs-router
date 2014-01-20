@@ -204,7 +204,9 @@ The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.
 [Download](https://github.com/erikringsmuth/requirejs-router/archive/master.zip) or use `bower install requirejs-router`.
 
 ## Building
-In Node.js run `gulp` to lint and minify your changes.
+- In node.js
+- Run `npm install` to install dependencies
+- Run `gulp` to lint and minify your code. This will also watch for changes.
 
 ## Running Tests
 Open `/tests/AmdSpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.
