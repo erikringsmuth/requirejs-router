@@ -1,0 +1,20 @@
+{
+  // Enforcing options
+  "indent": 2,
+  "undef": true,
+  "unused": true,
+  "trailing": true,
+  "quotmark": true,
+
+  // Relaxing options
+  "globals": {
+    "define": true,
+    "require": true
+  },
+  "globalstrict": true,
+  "loopfunc": true,
+  "smarttabs": true,
+
+  // Environments
+  "browser": true
+}

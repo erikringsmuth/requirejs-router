@@ -200,5 +200,11 @@ The top-down approach is more involved than the IoC approach and ties you to one
 ## Demo Site
 The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
+## Install
+[Download](https://github.com/erikringsmuth/requirejs-router/archive/master.zip) or use `bower install requirejs-router`.
+
+## Building
+In Node.js run `gulp` to lint and minify your changes.
+
 ## Running Tests
 Open `/tests/AmdSpecRunner.html` and make sure all tests pass. The tests are written using Jasmine.

@@ -23,8 +23,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-/*global define, require, console*/
-/*jshint loopfunc: true*/
 define([], function() {
   'use strict';
 
@@ -93,7 +91,7 @@ define([], function() {
 
     // router.routeLoadedCallback(module, routeArguments) - Called when RequireJS finishes loading a module for a route
     routeLoadedCallback: function routeLoadedCallback() {
-      console.log('`router.routeLoadedCallback(module)` has not been implemented.');
+      throw '`router.routeLoadedCallback(module)` has not been implemented.';
     },
 
     // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route

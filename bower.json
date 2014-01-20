@@ -20,8 +20,11 @@
   "ignore": [
     "**/.*",
     "bower_components",
+    "node_modules",
     "tests",
     "bower.json",
+    "package.json",
+    "gulpfile.js",
     "license.md",
     "readme.md"
   ]
