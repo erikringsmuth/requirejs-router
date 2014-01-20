@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "gulp": "~3.4.1",
+    "gulp": "~3.4.0",
     "gulp-rename": "~0.2.2",
     "gulp-concat": "~2.1.7",
     "gulp-uglify": "~0.1.0",
