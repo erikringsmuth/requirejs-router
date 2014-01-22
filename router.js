@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.2.1
+// Version: 0.2.2
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -77,8 +77,8 @@ define([], function() {
           window.addEventListener('popstate', router.urlChangeEventHandler, false);
         } else {
           // IE 8 and lower
-          window.attachEvent('hashchange', router.urlChangeEventHandler);
-          window.attachEvent('popstate', router.urlChangeEventHandler);
+          window.attachEvent('onhashchange', router.urlChangeEventHandler);
+          window.attachEvent('onpopstate', router.urlChangeEventHandler);
         }
         hasBeenInitialized = true;
       }
@@ -231,7 +231,7 @@ define([], function() {
       for (var i in queryParameters) {
         var queryParameter = queryParameters[i];
         var queryParameterParts = queryParameter.split('=');
-        args[queryParameterParts[0]] = queryParameterParts.splice(1).join('=');
+        args[queryParameterParts[0]] = queryParameterParts.splice(1, queryParameterParts.length - 1).join('=');
       }
 
       // Parse the arguments into unescaped strings, numbers, or booleans
@@ -269,7 +269,8 @@ define([], function() {
 
       // The relative URI is everything after the third slash including the third slash
       // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-      var relativeUri = '/' + url.split('/').splice(3).join('/');
+      var splitUrl = url.split('/');
+      var relativeUri = '/' + splitUrl.splice(3, splitUrl.length - 3).join('/');
 
       // The path is everything in the relative URI up to the first ? or #
       // Example path = '/other/path'
