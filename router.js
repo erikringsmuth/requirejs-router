@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.2.2
+// Version: 0.2.3
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -49,7 +49,9 @@ define([], function() {
     config: function config(properties) {
       // Copy properties from the config object - this extends the router
       for (var property in properties) {
-        router[property] = properties[property];
+        if (properties.hasOwnProperty(property)) {
+          router[property] = properties[property];
+        }
       }
 
       // Check and configure each route
@@ -57,16 +59,18 @@ define([], function() {
       //
       // You can override this with your own function to do a custom matcher.
       for (var routeName in router.routes) {
-        var route = router.routes[routeName];
-        if (typeof(route.path) === 'undefined' && typeof(route.matchesUrl) === 'undefined') {
-          throw 'Every route must have a path or matchesUrl()';
-        }
-        if (typeof(route.matchesUrl) === 'undefined') {
-          (function(route) {
-            route.matchesUrl = function matchesUrl() {
-              return router.testRoute(route);
-            };
-          })(route);
+        if (router.routes.hasOwnProperty(routeName)) {
+          var route = router.routes[routeName];
+          if (typeof(route.path) === 'undefined' && typeof(route.matchesUrl) === 'undefined') {
+            throw 'Every route must have a path or matchesUrl()';
+          }
+          if (typeof(route.matchesUrl) === 'undefined') {
+            (function(route) {
+              route.matchesUrl = function matchesUrl() {
+                return router.testRoute(route);
+              };
+            })(route);
+          }
         }
       }
 
@@ -109,9 +113,11 @@ define([], function() {
     // router.currentRoute() - the current route (ex: {path: '/', module: 'home/homeView', matchesUrl: function() { /** Returns true or false */ }})
     currentRoute: function currentRoute() {
       for (var i in router.routes) {
-        var route = router.routes[i];
-        if (route.matchesUrl()) {
-          return route;
+        if (router.routes.hasOwnProperty(i)) {
+          var route = router.routes[i];
+          if (route.matchesUrl()) {
+            return route;
+          }
         }
       }
       return null;
@@ -159,11 +165,13 @@ define([], function() {
 
       // Check equality of each path segment
       for (var i in routePathSegments) {
-        // The path segments must be equal, be a wildcard segment '*', or be a path parameter like ':id'
-        var routeSegment = routePathSegments[i];
-        if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
-          // The path segment wasn't the same string and it wasn't a wildcard or parameter
-          return false;
+        if (routePathSegments.hasOwnProperty(i)) {
+          // The path segments must be equal, be a wildcard segment '*', or be a path parameter like ':id'
+          var routeSegment = routePathSegments[i];
+          if (routeSegment !== pathSegments[i] && routeSegment !== '*' && routeSegment.charAt(0) !== ':') {
+            // The path segment wasn't the same string and it wasn't a wildcard or parameter
+            return false;
+          }
         }
       }
 
@@ -190,9 +198,11 @@ define([], function() {
       // and route `{path: '/customer/:id'}`
       // gets id = '123'
       for (var segmentIndex in routePathSegments) {
-        var routeSegment = routePathSegments[segmentIndex];
-        if (routeSegment.charAt(0) === ':') {
-          args[routeSegment.substring(1)] = pathSegments[segmentIndex];
+        if (routePathSegments.hasOwnProperty(segmentIndex)) {
+          var routeSegment = routePathSegments[segmentIndex];
+          if (routeSegment.charAt(0) === ':') {
+            args[routeSegment.substring(1)] = pathSegments[segmentIndex];
+          }
         }
       }
 
@@ -229,9 +239,11 @@ define([], function() {
         queryParameters = [];
       }
       for (var i in queryParameters) {
-        var queryParameter = queryParameters[i];
-        var queryParameterParts = queryParameter.split('=');
-        args[queryParameterParts[0]] = queryParameterParts.splice(1, queryParameterParts.length - 1).join('=');
+        if (queryParameters.hasOwnProperty(i)) {
+          var queryParameter = queryParameters[i];
+          var queryParameterParts = queryParameter.split('=');
+          args[queryParameterParts[0]] = queryParameterParts.splice(1, queryParameterParts.length - 1).join('=');
+        }
       }
 
       // Parse the arguments into unescaped strings, numbers, or booleans
