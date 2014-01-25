@@ -24,19 +24,19 @@ define([], function() {
       // Define all of your routes here
       routes: {
         // matches an exact path
-        home: {path: '/home', module: 'home/homeView'},
+        home: {path: '/home', moduleId: 'home/homeView'},
         
         // matches using a wildcard
-        customer: {path: '/customer/*', module: 'customer/customerView'},
+        customer: {path: '/customer/*', moduleId: 'customer/customerView'},
         
         // matches using a path variable
-        order: {path: '/orders/:id', module: 'order/orderView'},
+        order: {path: '/orders/:id', moduleId: 'order/orderView'},
         
         // matches '/dev' or '/development'
-        dev: {testRoute: function() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
+        dev: {testRoute: function() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, moduleId: 'dev/devView'}},
 
         // matches everything else
-        notFound: {path: '*', module: 'notFound/notFoundView'}
+        notFound: {path: '*', moduleId: 'notFound/notFoundView'}
       },
 
       // When a route loads, render the view and attach it to the document
@@ -60,19 +60,19 @@ define([], function() {
 - `router.routeLoadedCallback(module, routeArguments)` - Called when RequireJS finishes loading a module for a route
 - `router.routeArguments(route, url)` - Gets the path variables and query parameter values
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
+- `router.activeRoute` - A reference to the active route - ex: `{path: '/home', moduleId: 'home/homeView'}`
 - `router.testRoute(route)` - Test if the route matches the current URL
 - `router.currentUrl()` - Gets the current URL from the address bar. You can mock this when unit testing.
-- `router.activeRoute` - A reference to the active route - ex: `{path: '/home', module: 'home/homeView'}`
 - `router.urlChangeEventHandler()` - Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`.
 
 ## routes
-A route has 3 properties
+A route has 4 properties
 - `path` (string) - The URL path
-- `module` (string) - The AMD module ID
-- `testRoute()` function - Use this to write custom route matchers
+- `moduleId` (string) - The AMD module ID
+- `testRoute()` (function) - Optionally use this to write custom route matchers
 - `active` (boolean) - indicates if it's the active route
 
-A simple route object would look like this `{path: '/home', module: 'home/homeView'}`. When you navigate to `/home` it will load the `home/homeView` module.
+A simple route object would look like this `{path: '/home', moduleId: 'home/homeView'}`. When you navigate to `/home` it will load the `home/homeView` module.
 
 ### route.path
 - The simplest path is an exact match like `/home`.
@@ -80,8 +80,8 @@ A simple route object would look like this `{path: '/home', module: 'home/homeVi
 - You can use path variables to match a segment of a path. For example `/customer/:id/name` will match `/customer/123/name`. This will set `routeArguments.id = 123` in the `routeLoadedCallback(module, routeArguments)`.
 - The catch-all path `'*'` will match everything. This is generally used to load a "Not Found" view.
 
-### route.module
-This is the AMD module ID. This is the ID you would use in a `require` or `define` statement like `require(['module'], function(module) {})`.
+### route.moduleId
+This is the AMD module ID. This is the ID you would use in a `require` or `define` statement like `require(['moduleId'], function(module) {})`.
 
 ### route.testRoute()
 If you need more control over your route matching you can override `route.testRoute()` to specify your own logic. This is useful if you need to check for an either-or case or use regex to test complicated paths.
@@ -134,14 +134,14 @@ For example, these URLs all have this path `/example/path`.
 
 The 4th URL example ignores the normal path and query parameters since it has a hash path.
 
+## activeRoute
+A reference to the active route. Example: `{path: '/home', moduleId: 'home/homeView'}`
+
 ## testRoute(route)
 Compares the route agains the current URL. Returns `true` if it matches, `false` otherwise.
 
 ## currentUrl()
 Gets the current URL from the address bar. You can mock this when unit testing.
-
-## activeRoute
-A reference to the active route. Example: `{path: '/home', module: 'home/homeView'}`
 
 ## urlChangeEventHandler()
 Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`. You can override this if you need a hook to do something before `loadCurrentRoute()` is called.
@@ -185,9 +185,9 @@ Here's an example router and layout view setup with the top-down approach.
 ```js
 router.config({
   routes: {
-    home: {path: '/', module: 'home/homeView'},
-    order: {path: '/order', module: 'order/orderView'},
-    notFound: {path: '*', module: 'notFound/NotFoundView'}
+    home: {path: '/', moduleId: 'home/homeView'},
+    order: {path: '/order', moduleId: 'order/orderView'},
+    notFound: {path: '*', moduleId: 'notFound/NotFoundView'}
   },
 
   // The URL change event handler calls your layout view's render method

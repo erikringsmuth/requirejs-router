@@ -30,9 +30,9 @@ define([
       // Arrange
       router.config({
         routes: {
-          route1: {path: '/first/path', module: 'firstModule'},
-          route2: {path: '/second/path', module: 'secondModule'},
-          route3: {path: '/third/path', module: 'thirdModule'}
+          route1: {path: '/first/path', moduleId: 'firstModule'},
+          route2: {path: '/second/path', moduleId: 'secondModule'},
+          route3: {path: '/third/path', moduleId: 'thirdModule'}
         }
       });
       spyOn(router, 'testRoute').and.callFake(function(route) { return route.path === '/second/path'; });

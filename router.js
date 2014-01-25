@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.3.0
+// Version: 0.4.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -39,10 +39,10 @@ define([], function() {
     // Example
     // router.config({
     //   routes: {
-    //     root: {path: '/', module: 'home/homeView'},
-    //     api: {path: '/api', module: 'api/apiView'},
-    //     example: {path: '/customer/:id', module: 'customer/customerView'},
-    //     notFound: {path: '*', module: 'notFound/NotFoundView'}
+    //     root: {path: '/', moduleId: 'home/homeView'},
+    //     api: {path: '/api', moduleId: 'api/apiView'},
+    //     example: {path: '/customer/:id', moduleId: 'customer/customerView'},
+    //     notFound: {path: '*', moduleId: 'notFound/NotFoundView'}
     //   },
     //   routeLoadedCallback: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
@@ -79,7 +79,7 @@ define([], function() {
 
     // router.routeLoadedCallback(module, routeArguments) - Called when RequireJS finishes loading a module for a route
     routeLoadedCallback: function routeLoadedCallback() {
-      throw '`router.routeLoadedCallback(module)` has not been implemented.';
+      throw '`router.routeLoadedCallback(module, routeArguments)` has not been implemented.';
     },
 
     // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
@@ -95,7 +95,7 @@ define([], function() {
             router.activeRoute = route;
 
             // Load the route's module
-            require([route.module], function(module) {
+            require([route.moduleId], function(module) {
               // Make sure this is still the active route from when loadCurrentRoute was called. The asynchronous nature
               // of AMD loaders means we could have triggered multiple hashchanges or popstates before the AMD module
               // finished loading. If we trigger route /a then route /b but /b finishes loading before /a we don't want
@@ -132,7 +132,7 @@ define([], function() {
       // This algorithm tries to succeed or fail as quickly as possible.
       //
       // Example path = '/example/path'
-      // Example route: `exampleRoute: {path: '/example/*', module: 'example/exampleView'}`
+      // Example route: `exampleRoute: {path: '/example/*', moduleId: 'example/exampleView'}`
       var path = router.urlPath(router.currentUrl());
 
       // If the route path is '*', or an exact match then the route path is considered a match
