@@ -33,7 +33,7 @@ define([], function() {
         order: {path: '/orders/:id', module: 'order/orderView'},
         
         // matches '/dev' or '/development'
-        dev: {matchesUrl: function matchesUrl() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
+        dev: {testRoute: function() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, module: 'dev/devView'}},
 
         // matches everything else
         notFound: {path: '*', module: 'notFound/notFoundView'}
@@ -62,28 +62,32 @@ define([], function() {
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
 - `router.testRoute(route)` - Test if the route matches the current URL
 - `router.currentUrl()` - Gets the current URL from the address bar. You can mock this when unit testing.
-- `router.currentRoute()` - The current route - ex: `{path: '/home', module: 'home/homeView', matchesUrl: function() {...}}`
+- `router.activeRoute` - A reference to the active route - ex: `{path: '/home', module: 'home/homeView'}`
 - `router.urlChangeEventHandler()` - Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`.
 
 ## routes
 A route has 3 properties
 - `path` (string) - The URL path
 - `module` (string) - The AMD module ID
-- `matchesUrl()` function - Tests the route to see if it matches the current URL
+- `testRoute()` function - Use this to write custom route matchers
+- `active` (boolean) - indicates if it's the active route
 
 A simple route object would look like this `{path: '/home', module: 'home/homeView'}`. When you navigate to `/home` it will load the `home/homeView` module.
 
-### route path
+### route.path
 - The simplest path is an exact match like `/home`.
 - You can use wildcards to match a segment of a path. For example `/customer/*/name` will match `/customer/123/name`.
 - You can use path variables to match a segment of a path. For example `/customer/:id/name` will match `/customer/123/name`. This will set `routeArguments.id = 123` in the `routeLoadedCallback(module, routeArguments)`.
 - The catch-all path `'*'` will match everything. This is generally used to load a "Not Found" view.
 
-### route module
+### route.module
 This is the AMD module ID. This is the ID you would use in a `require` or `define` statement like `require(['module'], function(module) {})`.
 
-### route matchesUrl()
-If you need more control over your route matching you can override `route.matchesUrl()` to specify your own logic. This is useful if you need to check for an either-or case or use regex to test complicated paths.
+### route.testRoute()
+If you need more control over your route matching you can override `route.testRoute()` to specify your own logic. This is useful if you need to check for an either-or case or use regex to test complicated paths.
+
+### route.active
+Indicates if it's the active route. `true` if it's the active route, `false` otherwise.
 
 ## loadCurrentRoute()
 Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `urlChangeEventHandler()` any time a hashchange or popstate event is triggered.
@@ -129,6 +133,18 @@ For example, these URLs all have this path `/example/path`.
 - `http://domain.com/other/path?queryParam2=false#/example/path?queryParam=true`
 
 The 4th URL example ignores the normal path and query parameters since it has a hash path.
+
+## testRoute(route)
+Compares the route agains the current URL. Returns `true` if it matches, `false` otherwise.
+
+## currentUrl()
+Gets the current URL from the address bar. You can mock this when unit testing.
+
+## activeRoute
+A reference to the active route. Example: `{path: '/home', module: 'home/homeView'}`
+
+## urlChangeEventHandler()
+Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`. You can override this if you need a hook to do something before `loadCurrentRoute()` is called.
 
 ## How to use
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.

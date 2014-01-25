@@ -10,68 +10,57 @@ define([
   'use strict';
 
   describe('router.config()', function() {
-    // Arrange, Act
-    router.config({
-      routes: {
-        route1: {path: '/example/path'},
-        route2: {path: '/second/path'}
-      }
-    });
+    it('should add routes to the router', function() {
+      // Arrange, Act
+      router.config({
+        routes: {
+          route1: {path: '/example/path'},
+          route2: {path: '/second/path'}
+        }
+      });
 
-    it('should add a matchesUrl() method to every route', function() {
       // Assert
-      for (var route in router.routes) {
-        expect(router.routes[route].matchesUrl).toBeDefined();
-      }
+      expect(router.routes.route1).toBeDefined();
+      expect(router.routes.route2).toBeDefined();
     });
   });
 
   describe('router.loadCurrentRoute()', function() {
     it('should call router.routeLoadedCallback(module, routeArguments) when it\'s done loading the route\'s module', function() {
       // Arrange
-      var mockRoute = {path: '/example/path', module: 'example/exampleView'};
+      router.config({
+        routes: {
+          route1: {path: '/first/path', module: 'firstModule'},
+          route2: {path: '/second/path', module: 'secondModule'},
+          route3: {path: '/third/path', module: 'thirdModule'}
+        }
+      });
+      spyOn(router, 'testRoute').and.callFake(function(route) { return route.path === '/second/path'; });
       var mockUrl = 'http://domain.com/example/path?queryParam=true';
       var mockRouteArguments = {queryParam: true};
       var MockModule = function() {};
-      spyOn(router, 'currentRoute').and.returnValue(mockRoute);
       spyOn(router, 'currentUrl').and.returnValue(mockUrl);
       spyOn(router, 'routeArguments').and.returnValue(mockRouteArguments);
       spyOn(router, 'routeLoadedCallback');
       spyOn(window, 'require').and.callFake(function() {
         // This part of the test isn't precise since it's completely replacing the anonymouse require callback. There's no other
         // way to do this so this will have to do.
-        router.routeLoadedCallback.call(router, MockModule, router.routeArguments(mockRoute, mockUrl));
+        router.routeLoadedCallback.call(router, MockModule, router.routeArguments(router.routes.route2, router.currentUrl()));
       });
 
       // Act
       router.loadCurrentRoute();
 
       // Assert
-      expect(router.currentRoute).toHaveBeenCalled();
+      expect(router.testRoute.calls.count()).toEqual(2);
+      expect(router.testRoute.calls.argsFor(0)[0]).toBe(router.routes.route1);
+      expect(router.testRoute.calls.argsFor(1)[0]).toBe(router.routes.route2);
+      expect(router.activeRoute).toBe(router.routes.route2);
+      expect(router.routes.route2.active).toEqual(true);
       expect(router.currentUrl).toHaveBeenCalled();
-      expect(window.require.calls.argsFor(0)[0]).toEqual(['example/exampleView']);
-      expect(router.routeArguments.calls.argsFor(0)).toEqual([mockRoute, mockUrl]);
+      expect(window.require.calls.argsFor(0)[0]).toEqual(['secondModule']);
+      expect(router.routeArguments.calls.argsFor(0)).toEqual([router.routes.route2, mockUrl]);
       expect(router.routeLoadedCallback.calls.argsFor(0)).toEqual([MockModule, mockRouteArguments]);
-    });
-  });
-
-  describe('router.currentRoute()', function() {
-    it('should return the first route that matches the URL', function() {
-      // Arrange
-      router.config({
-        routes: {
-          route1: {path: '/first/path'},
-          route2: {path: '/second/path'},
-          route3: {path: '/third/path'}
-        }
-      });
-      spyOn(router, 'currentUrl').and.returnValue('http://domain.com/second/path?queryParam=true');
-
-      // Act
-      var actual = router.currentRoute();
-
-      // Assert
-      expect(actual).toEqual(router.routes.route2);
     });
   });
 
