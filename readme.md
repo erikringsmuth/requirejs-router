@@ -138,7 +138,7 @@ The 4th URL example ignores the normal path and query parameters since it has a 
 A reference to the active route. Example: `{path: '/home', moduleId: 'home/homeView'}`
 
 ## testRoute(route)
-Compares the route agains the current URL. Returns `true` if it matches, `false` otherwise.
+Compares the route against the current URL. Returns `true` if it matches, `false` otherwise.
 
 ## currentUrl()
 Gets the current URL from the address bar. You can mock this when unit testing.
