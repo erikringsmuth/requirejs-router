@@ -57,7 +57,7 @@ define([], function() {
 - `router.config()` - Configure the router
 - `router.routes` - The routes
 - `router.loadCurrentRoute()` - Tells the router to load the module for the current route
-- `router.routeLoadedCallback(module, routeArguments)` - Called when RequireJS finishes loading a module for a route
+- `router.routeLoadedCallback(module, routeArguments)` - Called when the route's AMD module finishes loading
 - `router.routeArguments(route, url)` - Gets the path variables and query parameter values
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
 - `router.activeRoute` - A reference to the active route - ex: `{path: '/home', moduleId: 'home/homeView'}`
@@ -93,7 +93,7 @@ Indicates if it's the active route. `true` if it's the active route, `false` oth
 Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `urlChangeEventHandler()` any time a hashchange or popstate event is triggered.
 
 ## routeLoadedCallback(module, routeArguments)
-Called when RequireJS finishes loading the module for the current route. The AMD module and route arguments will be passed as arguments. Use this method to render the view and attach it to the document. You must implement this function in the router config. A simple function like this will do everything you need.
+Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. Implement this function in the router config. A simple function like this will do everything you need.
 
 ```js
 function routeLoadedCallback(module, routeArguments) {
@@ -174,7 +174,7 @@ Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
 2. A hashchange event is triggered and is intercepted by the `urlChangeEventHandler()`
-3. You override the `urlChangeEventHandler()` to call `layoutView.render()` which draws your header, footer, and an empty main-content section. At this point the header has the "Orders" link marked as active `<li class="active"><a href="#/order">Orders</a></li>`.
+3. Override the `urlChangeEventHandler()` to call `layoutView.render()` which draws your header, footer, and an empty main-content section. At this point the header has the "Orders" link marked as active `<li class="active"><a href="#/order">Orders</a></li>`.
 4. The last step in `layoutView.render()` calls `router.loadCurrentRoute()` which uses RequireJS to load the `'order/orderView'` module
 5. When the module finishes loading the `routeLoadedCallback(module, routeArguments)` is called with `OrderView` being passed in as the module
 6. Your `routeLoadedCallback(module, routeArguments)` creates a new instance of `OrderView`, renders it, and attaches it to the layoutView's main-content section
@@ -183,6 +183,20 @@ You're done. The layoutView is re-rendered with the header links updated and the
 
 Here's an example router and layout view setup with the top-down approach.
 ```js
+var LayoutView = Backbone.View.extend({
+  // Draw the header, footer, and an empty main-content section
+  render: function() {
+    this.$el.html(this.template({model: this.model}));
+
+    // Tell the router to load the current route, this calls `router.routeLoadedCallback()` when it's done
+    router.loadCurrentRoute();
+    return this;
+  }
+});
+
+// Create one instance of your layout for your entire site
+var layoutView = new LayoutView();
+
 router.config({
   routes: {
     home: {path: '/', moduleId: 'home/homeView'},
@@ -190,28 +204,22 @@ router.config({
     notFound: {path: '*', moduleId: 'notFound/NotFoundView'}
   },
 
-  // The URL change event handler calls your layout view's render method
+  // Re-render the layout before loading the current route's module
   urlChangeEventHandler: function urlChangeEventHandler() {
     layoutView.render.call(layoutView);
   },
 
-  // This gets called when the RequireJS module finishes loading
+  // Called when the route's module finishes loading
   routeLoadedCallback: function routeLoadedCallback(module, routeArguments) {
     // Attach the child view to the layoutView's main-content section
-    var mainContent = layoutView.el.querySelector('main#content');
+    var mainContent = layoutView.el.querySelector('#content');
     mainContent.innerHTML = '';
     mainContent.appendChild(new module(routeArguments).render().el);
   }
 });
 
-// Your layout view's `render()` method draws the header, footer, and an empty main-content section which the `router.routeLoadedCallback()` method populates
-layoutView.render = function render() {
-  this.el.innerHTML = this.template({model: this.model});
-
-  // It tells the router to finish loading the current route after it's rendered the layout
-  this.router.loadCurrentRoute();
-  return this;
-}
+// Trigger the initial page load
+router.loadCurrentRoute();
 ```
 
 The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach almost completely decouples the view rendering from the routing.
