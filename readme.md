@@ -43,7 +43,7 @@ define([], function() {
       routeLoadedCallback: function routeLoadedCallback(module, routeArguments) {
         var body = document.querySelector('body');
         body.innerHTML = '';
-        body.appendChild(new module(routeArguments).render().outerEl);
+        body.appendChild(new module(routeArguments).outerEl);
       }
     });
 
@@ -99,7 +99,7 @@ Called when the route's AMD module finishes loading. Use this to render the view
 function routeLoadedCallback(module, routeArguments) {
   var body = document.querySelector('body');
   body.innerHTML = '';
-  body.appendChild(new module(routeArguments).render().outerEl);
+  body.appendChild(new module(routeArguments).outerEl);
 }
 ```
 
