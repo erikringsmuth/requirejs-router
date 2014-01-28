@@ -13,10 +13,6 @@
     "AMD"
   ],
   "license": "MIT",
-  "dependencies": {
-    "requirejs": "2.1.10",
-    "jasmine": "2.0.0"
-  },
   "ignore": [
     "**/.*",
     "bower_components",

@@ -222,7 +222,7 @@ The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.
 ## Install
 [Download](https://github.com/erikringsmuth/requirejs-router/archive/master.zip) or run `bower install requirejs-router` in node.
 
-## Build
+## Build [![Build Status](https://travis-ci.org/erikringsmuth/requirejs-router.png?branch=master)](https://travis-ci.org/erikringsmuth/requirejs-router)
 - In node.js
 - Run `npm install` to install dependencies
 - Run `gulp` to lint and minify your code. This will also watch for changes.
