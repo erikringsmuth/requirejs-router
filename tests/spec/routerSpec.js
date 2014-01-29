@@ -203,6 +203,18 @@ define([
       var result = router.testRoute({path: '/other/route'});
       expect(result).toEqual(false);
     });
+
+    it('should match a regex pattern', function() {
+      spyOn(router, 'urlPath').and.returnValue('/example/path');
+      var result = router.testRoute({ path: /^\/\w+\/\w+/i });
+      expect(result).toEqual(true);
+    });
+
+    it('should not match a regex pattern that doesn\'t match', function() {
+      spyOn(router, 'urlPath').and.returnValue('/example/path');
+      var result = router.testRoute({ path: /^\/\w+\//i });
+      expect(result).toEqual(true);
+    });
   });
 
   describe('router.routeArguments(route, url)', function() {
@@ -290,6 +302,13 @@ define([
       var url = 'http://domain.com/';
       var result = router.routeArguments(route, url);
       expect(result.hasOwnProperty('')).toBeFalsy();
+    });
+
+    it('won\'t blow up on a regex path', function() {
+      var route = { path: /^\/\w+\/\d+/i };
+      var url = 'http://domain.com/customer/123?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.queryParam).toEqual(true);
     });
   });
 });

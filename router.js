@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.4.1
+// Version: 0.5.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -129,7 +129,7 @@ define([], function() {
         return route.testRoute.call(route);
       }
 
-      // This algorithm tries to succeed or fail as quickly as possible.
+      // This algorithm tries to succeed or fail for the most common cases as quickly as possible.
       //
       // Example path = '/example/path'
       // Example route: `exampleRoute: {path: '/example/*', moduleId: 'example/exampleView'}`
@@ -138,6 +138,11 @@ define([], function() {
       // If the route path is '*', or an exact match then the route path is considered a match
       if (route.path === '*' || route.path === path) {
         return true;
+      }
+
+      // Test if it's a regular expression
+      if (route.path instanceof RegExp) {
+        return route.path.test(path);
       }
 
       // Look for wildcards
@@ -183,7 +188,7 @@ define([], function() {
 
       // Example routePathSegments = ['', 'example', '*']
       var routePathSegments = [];
-      if (route && route.path) {
+      if (route && route.path && !(route.path instanceof RegExp)) {
         routePathSegments = route.path.split('/');
       }
 
