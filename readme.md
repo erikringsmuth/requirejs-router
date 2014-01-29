@@ -235,6 +235,20 @@ The top-down approach is more involved than the IoC approach and ties you to one
 ## Demo Site
 The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
 
+## Navigation
+The RequireJS router does not re-implement the existing navigation capabilities of browsers. There are three ways to trigger a page load. `hashchange`, `popstate`, or a page load.
+
+If you are using `hashchange` you don't need to do anything. Clicking a link `<a href="#/new/page">New Page</a>` will trigger a `hashchange` event and tell the router to load the new route. You don't need to do anything with this event in your Javascript.
+
+If you are using HTML5 `pushState` you need one extra step. The `pushState()` method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use `pushState()` to navigate to another route you need to call it like this.
+
+```js
+history.pushState(stateObj, title, url); // push a new URL into the history stack
+history.go(0); // go to the current state in the history stack, this triggers a popstate event
+```
+
+You can also do a normal page load which will call `router.loadCurrentRoute()` in `main.js`.
+
 ## Install
 [Download](https://github.com/erikringsmuth/requirejs-router/archive/master.zip) or run `bower install requirejs-router` in node.
 
