@@ -201,7 +201,7 @@ router.config({
   routes: {
     home: {path: '/', moduleId: 'home/homeView'},
     order: {path: '/order', moduleId: 'order/orderView'},
-    notFound: {path: '*', moduleId: 'notFound/NotFoundView'}
+    notFound: {path: '*', moduleId: 'notFound/notFoundView'}
   },
 
   // Re-render the layout before loading the current route's module
