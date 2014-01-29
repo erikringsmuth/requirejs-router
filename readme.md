@@ -32,8 +32,11 @@ define([], function() {
         // matches using a path variable
         order: {path: '/orders/:id', moduleId: 'order/orderView'},
         
-        // matches '/dev' or '/development'
-        dev: {testRoute: function() { return router.testRoute({path: '/dev'}) || router.testRoute({path: '/development'}); }, moduleId: 'dev/devView'}},
+        // matches '/this' or '/that'
+        eitherOr: {testRoute: function() { return router.testRoute({path: '/this'}) || router.testRoute({path: '/that'}); }, moduleId: 'other/otherView'}},
+
+        // matches a pattern like '/word/number'
+        regex: {path: /^\/\w+\/\d+/i, moduleId: 'regex/regexView'}},
 
         // matches everything else
         notFound: {path: '*', moduleId: 'notFound/notFoundView'}
@@ -78,6 +81,7 @@ A simple route object would look like this `{path: '/home', moduleId: 'home/home
 - The simplest path is an exact match like `/home`.
 - You can use wildcards to match a segment of a path. For example `/customer/*/name` will match `/customer/123/name`.
 - You can use path variables to match a segment of a path. For example `/customer/:id/name` will match `/customer/123/name`. This will set `routeArguments.id = 123` in the `routeLoadedCallback(module, routeArguments)`.
+- You can use a regular expression to do awesome pattern matching. For example `/^\/\w+\/\d+/i` will match a pattern like `/word/number`.
 - The catch-all path `'*'` will match everything. This is generally used to load a "Not Found" view.
 
 ### route.moduleId
