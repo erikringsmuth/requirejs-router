@@ -3,6 +3,8 @@
 
 The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.
 
+The router works with `hashchange` and HTML5 `pushState`. One set of routes will match regular routes `/`, hash routes `#/`, and hashbang routes `#!/`.
+
 ## Configuration
 
 Here's an example `main.js` using the RequireJS Router to run your app.
@@ -24,22 +26,22 @@ define([], function() {
       // Define all of your routes here
       routes: {
         // matches an exact path
-        home: {path: '/home', moduleId: 'home/homeView'},
+        home: { path: '/home', moduleId: 'home/homeView' },
         
         // matches using a wildcard
-        customer: {path: '/customer/*', moduleId: 'customer/customerView'},
+        customer: { path: '/customer/*', moduleId: 'customer/customerView' },
         
         // matches using a path variable
-        order: {path: '/orders/:id', moduleId: 'order/orderView'},
+        order: { path: '/orders/:id', moduleId: 'order/orderView' },
+        
+        // matches a pattern like '/word/number'
+        regex: { path: /^\/\w+\/\d+/i, moduleId: 'regex/regexView' },
         
         // matches '/this' or '/that'
-        eitherOr: {testRoute: function() { return router.testRoute({path: '/this'}) || router.testRoute({path: '/that'}); }, moduleId: 'other/otherView'}},
-
-        // matches a pattern like '/word/number'
-        regex: {path: /^\/\w+\/\d+/i, moduleId: 'regex/regexView'}},
-
+        eitherOr: { testRoute: function() { return router.testRoute({path: '/this'}) || router.testRoute({path: '/that'}); }, moduleId: 'other/otherView'} },
+        
         // matches everything else
-        notFound: {path: '*', moduleId: 'notFound/notFoundView'}
+        notFound: { path: '*', moduleId: 'notFound/notFoundView' }
       },
 
       // When a route loads, render the view and attach it to the document
@@ -91,7 +93,7 @@ This is the AMD module ID. This is the ID you would use in a `require` or `defin
 If you need more control over your route matching you can override `route.testRoute()` to specify your own logic. This is useful if you need to check for an either-or case or use regex to test complicated paths.
 
 ### route.active
-Indicates if it's the active route. `true` if it's the active route, `false` otherwise.
+Indicates if it's the active route. `true` if it's the active route, `false` or `undefined` otherwise.
 
 ## loadCurrentRoute()
 Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `urlChangeEventHandler()` any time a hashchange or popstate event is triggered.
@@ -112,17 +114,19 @@ function routeLoadedCallback(module, routeArguments) {
 Route arguments contain path variables and query parameters. For example:
 ```js
 // This route and URL
-var route = {path: '/customer/:id'};
+var route = { path: '/customer/:id' };
 var url = 'http://domain.com/customer/123?orderBy=descending&filter=true';
 
 var routeArguments = router.routeArguments(route, url);
+```
 
-// Will result in these route arguments
-routeArguments = {
+Will result in these `routeArguments`
+```js
+{
   id: 123,
   orderBy: 'descending',
   filter: true
-};
+}
 ```
 
 The route arguments are parsed into their boolean, numeric, or decoded string formats.
@@ -153,9 +157,9 @@ Called when a hashchange or popstate event is triggered. This calls `router.load
 ## How to use
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
 
-There are two ways MV* frameworks handle routing and rendering. You can have `main.js` render your layout view (header, footer, etc.) then use the router to load the content view and insert it into the layout. This is the top-down approach.
+There are two ways MV* frameworks handle routing and rendering. You can have `main.js` render your layout (header, footer, etc.) then use the router to load the content view and insert it into the layout. This is the top-down approach.
 
-Alternatively you can have `main.js` directly load the content view and have the content view inject the layout and attach it to itself. This is the bottom-up IoC approach.
+Alternatively you can have `main.js` directly load the content view and have the content view inject the layout. This is the IoC approach. This is the simplest and most dynamic approach.
 
 ### IoC approach
 Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
