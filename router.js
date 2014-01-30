@@ -122,27 +122,27 @@ define([], function() {
     },
 
     // router.testRoute(route) - determines if the route matches the current URL
+    //
+    // This algorithm tries to fail or succeed as quickly as possible for the most common cases.
     testRoute: function testRoute(route) {
-      // Check for a custom route.testRoute() method
-      if (typeof(route.testRoute) === 'function') {
-        // Call the testRoute() method with `this` set to the route
-        return route.testRoute.call(route);
-      }
-
-      // This algorithm tries to succeed or fail for the most common cases as quickly as possible.
-      //
       // Example path = '/example/path'
       // Example route: `exampleRoute: {path: '/example/*', moduleId: 'example/exampleView'}`
       var path = router.urlPath(router.currentUrl());
 
-      // If the route path is '*', or an exact match then the route path is considered a match
-      if (route.path === '*' || route.path === path) {
+      // If the path is an exact match or '*' then the route is a match
+      if (route.path === path || route.path === '*') {
         return true;
       }
 
       // Test if it's a regular expression
       if (route.path instanceof RegExp) {
         return route.path.test(path);
+      }
+
+      // Check for a custom route.testRoute() method
+      if (typeof(route.testRoute) === 'function') {
+        // Call the testRoute() method with `this` set to the route
+        return route.testRoute.call(route);
       }
 
       // Look for wildcards
