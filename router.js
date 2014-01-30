@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.5.0
+// Version: 0.5.1
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -137,12 +137,6 @@ define([], function() {
       // Test if it's a regular expression
       if (route.path instanceof RegExp) {
         return route.path.test(path);
-      }
-
-      // Check for a custom route.testRoute() method
-      if (typeof(route.testRoute) === 'function') {
-        // Call the testRoute() method with `this` set to the route
-        return route.testRoute.call(route);
       }
 
       // Look for wildcards

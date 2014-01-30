@@ -37,9 +37,6 @@ define([], function() {
         // matches a pattern like '/word/number'
         regex: { path: /^\/\w+\/\d+/i, moduleId: 'regex/regexView' },
         
-        // matches '/this' or '/that'
-        eitherOr: { testRoute: function() { return router.testRoute({path: '/this'}) || router.testRoute({path: '/that'}); }, moduleId: 'other/otherView'} },
-        
         // matches everything else
         notFound: { path: '*', moduleId: 'notFound/notFoundView' }
       },
@@ -71,10 +68,9 @@ define([], function() {
 - `router.urlChangeEventHandler()` - Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`.
 
 ## routes
-A route has 4 properties
-- `path` (string) - The URL path
+A route has 3 properties
+- `path` (string or regex) - The URL path
 - `moduleId` (string) - The AMD module ID
-- `testRoute()` (function) - Optionally use this to write custom route matchers
 - `active` (boolean) - indicates if it's the active route
 
 A simple route object would look like this `{path: '/home', moduleId: 'home/homeView'}`. When you navigate to `/home` it will load the `home/homeView` module.
@@ -89,11 +85,8 @@ A simple route object would look like this `{path: '/home', moduleId: 'home/home
 ### route.moduleId
 This is the AMD module ID. This is the ID you would use in a `require` or `define` statement like `require(['moduleId'], function(module) {})`.
 
-### route.testRoute()
-If you need more control over your route matching you can override `route.testRoute()` to specify your own logic. This is useful if you need to check for an either-or case or use regex to test complicated paths.
-
 ### route.active
-Indicates if it's the active route. `true` if it's the active route, `false` or `undefined` otherwise.
+Indicates if it's the active route. `true` if it's the active route, `false` or `undefined` otherwise. This is set by the router.
 
 ## loadCurrentRoute()
 Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `urlChangeEventHandler()` any time a hashchange or popstate event is triggered.
