@@ -3,7 +3,7 @@
 
 The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.
 
-The router works with `hashchange` and HTML5 `pushState`. One set of routes will match regular routes `/`, hash routes `#/`, and hashbang routes `#!/`.
+The router works with `hashchange` and HTML5 `pushState`. One set of routes will match regular paths `/`, hash paths `#/`, and hashbang paths `#!/`.
 
 ## Configuration
 
