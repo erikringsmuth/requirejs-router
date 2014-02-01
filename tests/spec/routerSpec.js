@@ -4,30 +4,51 @@ define([
   'amd/describe',
   'amd/it',
   'amd/expect',
+  'amd/beforeEach',
   'amd/spyOn',
   'router'
-], function(describe, it, expect, spyOn, router) {
+], function(describe, it, expect, beforeEach, spyOn, router) {
   'use strict';
 
   describe('router.config()', function() {
-    it('should add routes to the router', function() {
-      // Arrange, Act
-      router.config({
-        routes: {
-          route1: {path: '/example/path'},
-          route2: {path: '/second/path'}
-        }
-      });
+    // Arrange
+    spyOn(window, 'addEventListener');
 
-      // Assert
+    // Act
+    router.config({
+      routes: {
+        route1: {path: '/example/path'},
+        route2: {path: '/second/path'}
+      }
+    });
+
+    // Assert
+    it('should add routes to the router', function() {
       expect(router.routes.route1).toBeDefined();
+      expect(router.routes.route1.path).toEqual('/example/path');
       expect(router.routes.route2).toBeDefined();
+      expect(router.routes.route2.path).toEqual('/second/path');
+    });
+
+    it('should set up event listeners'/*, function() {
+      // Jasmine has problems spying on `window.addEventListener`
+      expect(window.addEventListener).toHaveBeenCalled();
+    }*/);
+  });
+
+  describe('router.routeLoadedCallback()', function() {
+    it('should throw an exception if you don\'t implement it', function() {
+      expect(router.routeLoadedCallback).toThrow();
     });
   });
 
   describe('router.loadCurrentRoute()', function() {
-    it('should call router.routeLoadedCallback(module, routeArguments) when it\'s done loading the route\'s module', function() {
-      // Arrange
+    // Arrange
+    var mockUrl = 'http://domain.com/example/path?queryParam=true';
+    var mockRouteArguments = {queryParam: true};
+    var MockModule = function() {};
+
+    beforeEach(function() {
       router.config({
         routes: {
           route1: {path: '/first/path', moduleId: 'firstModule'},
@@ -36,9 +57,6 @@ define([
         }
       });
       spyOn(router, 'testRoute').and.callFake(function(route) { return route.path === '/second/path'; });
-      var mockUrl = 'http://domain.com/example/path?queryParam=true';
-      var mockRouteArguments = {queryParam: true};
-      var MockModule = function() {};
       spyOn(router, 'currentUrl').and.returnValue(mockUrl);
       spyOn(router, 'routeArguments').and.returnValue(mockRouteArguments);
       spyOn(router, 'routeLoadedCallback');
@@ -50,16 +68,30 @@ define([
 
       // Act
       router.loadCurrentRoute();
-
-      // Assert
+    });
+    
+    // Assert
+    it('should call router.testRoute(route) until it finds the matching route', function() {
       expect(router.testRoute.calls.count()).toEqual(2);
       expect(router.testRoute.calls.argsFor(0)[0]).toBe(router.routes.route1);
       expect(router.testRoute.calls.argsFor(1)[0]).toBe(router.routes.route2);
+    });
+
+    it('should mark the active route as active', function() {
       expect(router.activeRoute).toBe(router.routes.route2);
       expect(router.routes.route2.active).toEqual(true);
-      expect(router.currentUrl).toHaveBeenCalled();
+    });
+
+    it('should call RequireJS to load the module for the active route', function() {
       expect(window.require.calls.argsFor(0)[0]).toEqual(['secondModule']);
+    });
+
+    it('should get the route arguments', function() {
+      expect(router.currentUrl).toHaveBeenCalled();
       expect(router.routeArguments.calls.argsFor(0)).toEqual([router.routes.route2, mockUrl]);
+    });
+
+    it('should call router.routeLoadedCallback(module, routeArguments) when it\'s done loading the route\'s module', function() {
       expect(router.routeLoadedCallback.calls.argsFor(0)).toEqual([MockModule, mockRouteArguments]);
     });
   });
@@ -78,7 +110,7 @@ define([
   });
 
   describe('router.currentUrl()', function() {
-    it('should return window.location.href', function() {
+    it('should return get the current URL from the address bar', function() {
       // Act
       var actual = router.currentUrl();
 

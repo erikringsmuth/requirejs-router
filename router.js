@@ -39,10 +39,9 @@ define([], function() {
     // Example
     // router.config({
     //   routes: {
-    //     root: {path: '/', moduleId: 'home/homeView'},
-    //     api: {path: '/api', moduleId: 'api/apiView'},
-    //     example: {path: '/customer/:id', moduleId: 'customer/customerView'},
-    //     notFound: {path: '*', moduleId: 'notFound/NotFoundView'}
+    //     home: {path: '/', moduleId: 'home/homeView'},
+    //     customer: {path: '/customer/:id', moduleId: 'customer/customerView'},
+    //     notFound: {path: '*', moduleId: 'notFound/notFoundView'}
     //   },
     //   routeLoadedCallback: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
