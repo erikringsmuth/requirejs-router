@@ -42,7 +42,7 @@ define([], function() {
       },
 
       // When a route loads, render the view and attach it to the document
-      routeLoadedCallback: function routeLoadedCallback(module, routeArguments) {
+      routeLoadedCallback: function(module, routeArguments) {
         var body = document.querySelector('body');
         body.innerHTML = '';
         body.appendChild(new module(routeArguments).outerEl);
@@ -211,7 +211,7 @@ router.config({
   },
 
   // Called when the route's module finishes loading
-  routeLoadedCallback: function routeLoadedCallback(module, routeArguments) {
+  routeLoadedCallback: function(module, routeArguments) {
     // Attach the child view to the layoutView's main-content section
     var mainContent = layoutView.el.querySelector('#content');
     mainContent.innerHTML = '';
