@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.5.1
+// Version: 0.6.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -43,7 +43,7 @@ define([], function() {
     //     customer: {path: '/customer/:id', moduleId: 'customer/customerView'},
     //     notFound: {path: '*', moduleId: 'notFound/notFoundView'}
     //   },
-    //   routeLoadedCallback: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
+    //   onRouteLoad: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
     // })
     config: function config(properties) {
       // Copy properties from the config object - this extends the router
@@ -56,13 +56,13 @@ define([], function() {
       // Set up the window hashchange and popstate event listeners the first time the router is configured
       if (!hasBeenInitialized) {
         if (window.addEventListener) {
-          window.addEventListener('hashchange', router.urlChangeEventHandler, false);
-          window.addEventListener('popstate', router.urlChangeEventHandler, false);
+          window.addEventListener('hashchange', router.onUrlChange, false);
+          window.addEventListener('popstate', router.onUrlChange, false);
         } else {
           // IE 8 and lower
-          window.attachEvent('onhashchange', router.urlChangeEventHandler);
+          window.attachEvent('onhashchange', router.onUrlChange);
           // Check for popstate in case it's been polyfilled
-          window.attachEvent('popstate', router.urlChangeEventHandler);
+          window.attachEvent('popstate', router.onUrlChange);
         }
         hasBeenInitialized = true;
       }
@@ -76,9 +76,9 @@ define([], function() {
     // router.activeRoute - the active route
     activeRoute: {},
 
-    // router.routeLoadedCallback(module, routeArguments) - Called when RequireJS finishes loading a module for a route
-    routeLoadedCallback: function routeLoadedCallback() {
-      throw '`router.routeLoadedCallback(module, routeArguments)` has not been implemented.';
+    // router.onRouteLoad(module, routeArguments) - Called when RequireJS finishes loading a module for a route
+    onRouteLoad: function onRouteLoad() {
+      throw '`router.onRouteLoad(module, routeArguments)` has not been implemented.';
     },
 
     // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
@@ -100,7 +100,7 @@ define([], function() {
               // finished loading. If we trigger route /a then route /b but /b finishes loading before /a we don't want
               // /a to be rendered since we're actually at route /b.
               if (route.active) {
-                router.routeLoadedCallback.call(router, module, router.routeArguments(route, router.currentUrl()));
+                router.onRouteLoad.call(router, module, router.routeArguments(route, router.currentUrl()));
               }
             });
             break;
@@ -110,8 +110,8 @@ define([], function() {
       return router;
     },
 
-    // router.urlChangeEventHandler() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
-    urlChangeEventHandler: function urlChangeEventHandler() {
+    // router.onUrlChange() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
+    onUrlChange: function onUrlChange() {
       router.loadCurrentRoute();
     },
 

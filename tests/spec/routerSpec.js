@@ -36,9 +36,9 @@ define([
     }*/);
   });
 
-  describe('router.routeLoadedCallback()', function() {
+  describe('router.onRouteLoad()', function() {
     it('should throw an exception if you don\'t implement it', function() {
-      expect(router.routeLoadedCallback).toThrow();
+      expect(router.onRouteLoad).toThrow();
     });
   });
 
@@ -59,11 +59,11 @@ define([
       spyOn(router, 'testRoute').and.callFake(function(route) { return route.path === '/second/path'; });
       spyOn(router, 'currentUrl').and.returnValue(mockUrl);
       spyOn(router, 'routeArguments').and.returnValue(mockRouteArguments);
-      spyOn(router, 'routeLoadedCallback');
+      spyOn(router, 'onRouteLoad');
       spyOn(window, 'require').and.callFake(function() {
         // This part of the test isn't precise since it's completely replacing the anonymouse require callback. There's no other
         // way to do this so this will have to do.
-        router.routeLoadedCallback.call(router, MockModule, router.routeArguments(router.routes.route2, router.currentUrl()));
+        router.onRouteLoad.call(router, MockModule, router.routeArguments(router.routes.route2, router.currentUrl()));
       });
 
       // Act
@@ -91,18 +91,18 @@ define([
       expect(router.routeArguments.calls.argsFor(0)).toEqual([router.routes.route2, mockUrl]);
     });
 
-    it('should call router.routeLoadedCallback(module, routeArguments) when it\'s done loading the route\'s module', function() {
-      expect(router.routeLoadedCallback.calls.argsFor(0)).toEqual([MockModule, mockRouteArguments]);
+    it('should call router.onRouteLoad(module, routeArguments) when it\'s done loading the route\'s module', function() {
+      expect(router.onRouteLoad.calls.argsFor(0)).toEqual([MockModule, mockRouteArguments]);
     });
   });
 
-  describe('router.urlChangeEventHandler()', function() {
+  describe('router.onUrlChange()', function() {
     it('should call loadCurrentRoute()', function() {
       // Arrange
       spyOn(router, 'loadCurrentRoute');
 
       // Act
-      router.urlChangeEventHandler();
+      router.onUrlChange();
 
       // Assert
       expect(router.loadCurrentRoute).toHaveBeenCalled();
