@@ -189,7 +189,7 @@ var LayoutView = Backbone.View.extend({
   render: function() {
     this.$el.html(this.template({model: this.model}));
 
-    // Tell the router to load the current route, this calls `router.routeLoadedCallback()` when it's done
+    // Then load the route when the layout is done being rendered
     router.loadCurrentRoute();
     return this;
   }
@@ -213,9 +213,7 @@ router.config({
   // Called when the route's module finishes loading
   routeLoadedCallback: function(module, routeArguments) {
     // Attach the child view to the layoutView's main-content section
-    var mainContent = layoutView.el.querySelector('#content');
-    mainContent.innerHTML = '';
-    mainContent.appendChild(new module(routeArguments).render().el);
+    layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
   }
 });
 
