@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.6.0
+// Version: 0.6.1
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -53,16 +53,23 @@ define([], function() {
         }
       }
 
-      // Set up the window hashchange and popstate event listeners the first time the router is configured
+      // Set up the window popstate or hashchange event listeners the first time the router is configured. A hashchange
+      // also triggers a popstate event in modern browsers so we only want to listen to one or the other.
       if (!hasBeenInitialized) {
         if (window.addEventListener) {
-          window.addEventListener('hashchange', router.onUrlChange, false);
-          window.addEventListener('popstate', router.onUrlChange, false);
+          if (window.history && window.history.pushState) {
+            window.addEventListener('popstate', router.onUrlChange, false);
+          } else {
+            window.addEventListener('hashchange', router.onUrlChange, false);
+          }
         } else {
           // IE 8 and lower
-          window.attachEvent('onhashchange', router.onUrlChange);
-          // Check for popstate in case it's been polyfilled
-          window.attachEvent('popstate', router.onUrlChange);
+          if (window.history && window.history.pushState) {
+            // Check if pushState was polyfilled
+            window.attachEvent('popstate', router.onUrlChange);
+          } else {
+            window.attachEvent('onhashchange', router.onUrlChange);
+          }
         }
         hasBeenInitialized = true;
       }
