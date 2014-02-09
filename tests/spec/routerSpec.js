@@ -6,64 +6,157 @@ define([
   'amd/expect',
   'amd/beforeEach',
   'amd/spyOn',
+  'amd/createSpy',
   'router'
-], function(describe, it, expect, beforeEach, spyOn, router) {
+], function(describe, it, expect, beforeEach, spyOn, createSpy, router) {
   'use strict';
 
-  describe('router.config()', function() {
-    // Arrange
-    spyOn(window, 'addEventListener');
-
-    // Act
-    router.config({
-      routes: {
-        route1: {path: '/example/path'},
-        route2: {path: '/second/path'}
-      }
-    });
-
-    // Assert
-    it('should add routes to the router', function() {
-      expect(router.routes.route1).toBeDefined();
-      expect(router.routes.route1.path).toEqual('/example/path');
-      expect(router.routes.route2).toBeDefined();
-      expect(router.routes.route2.path).toEqual('/second/path');
+  describe('router.init(options)', function() {
+    beforeEach(function() {
+      // Arrange
+      spyOn(window, 'addEventListener');
+      spyOn(router, 'on');
+      spyOn(router, 'fire');
     });
 
     it('should set up event listeners'/*, function() {
       // Jasmine has problems spying on `window.addEventListener`
       expect(window.addEventListener).toHaveBeenCalled();
     }*/);
+
+    it('should set up an event handler to call loadCurrentRoute on statechange events', function() {
+      // Act
+      router.init();
+
+      // Assert
+      expect(router.on).toHaveBeenCalled();
+      expect(router.on.calls.argsFor(0)[0]).toEqual('statechange');
+    });
+
+    it('should not set up an event handler to call loadCurrentRoute on statechange events if the option is turned off', function() {
+      // Act
+      router.init({loadCurrentRouteOnStateChange: false});
+
+      // Assert
+      expect(router.on).not.toHaveBeenCalled();
+    });
+
+    it('should fire the initial statechange event to load the current route', function() {
+      // Act
+      router.init();
+
+      // Assert
+      expect(router.fire).toHaveBeenCalled();
+      expect(router.fire.calls.argsFor(0)).toEqual(['statechange']);
+    });
+
+    it('should not fire the initial statechange event to load the current route if the option is turned off', function() {
+      // Act
+      router.init({triggerInitialStateChange: false});
+
+      // Assert
+      expect(router.fire).not.toHaveBeenCalled();
+    });
   });
 
-  describe('router.onRouteLoad()', function() {
-    it('should throw an exception if you don\'t implement it', function() {
-      expect(router.onRouteLoad).toThrow();
+  describe('router.registerRoutes(routes)', function() {
+    it('should add routes to the router', function() {
+      // Arrange
+      var routes = {
+        route1: {path: '/example/path'},
+        route2: {path: '/second/path'}
+      };
+
+      // Act
+      router.registerRoutes(routes);
+
+      // Assert
+      expect(router.routes.route1).toBeDefined();
+      expect(router.routes.route1.path).toEqual('/example/path');
+      expect(router.routes.route2).toBeDefined();
+      expect(router.routes.route2.path).toEqual('/second/path');
+    });
+
+    it('should add additional routes to the router', function() {
+      // Arrange
+      var routes = {
+        route1: {path: '/new/route1'},
+        route3: {path: '/third/path'}
+      };
+
+      // Act
+      router.registerRoutes(routes);
+
+      // Assert
+      expect(router.routes.route1.path).toEqual('/new/route1');
+      expect(router.routes.route2.path).toEqual('/second/path');
+      expect(router.routes.route3.path).toEqual('/third/path');
+    });
+  });
+
+  describe('router.on(eventName, eventHandler)', function() {
+    // Arrange
+    var testCallback = createSpy('testCallback');
+
+    // Act
+    router.on('testevent', testCallback);
+
+    // Assert
+    it('should set up the event handler so that it is called when the event is triggered', function() {
+      router.fire('testevent');
+      expect(testCallback).toHaveBeenCalled();
+    });
+  });
+
+  describe('router.fire(eventName, arg1, arg2, ...)', function() {
+    // Arrange
+    var testCallback = createSpy('testCallback');
+    router.on('testevent', testCallback);
+
+    // Act
+    router.fire('testevent', 'firstArg', 'secondArg');
+
+    // Assert
+    it('should call all eventName callbacks with the event args', function() {
+      expect(testCallback).toHaveBeenCalled();
+      expect(testCallback.calls.argsFor(0)).toEqual(['firstArg', 'secondArg']);
+    });
+  });
+
+  describe('router.off(eventName, eventHandler)', function() {
+    // Arrange
+    var testCallback = createSpy('testCallback');
+    router.on('testevent', testCallback);
+
+    // Act
+    router.off('testevent', testCallback);
+    router.fire('testevent', 'firstArg', 'secondArg');
+
+    // Assert
+    it('should un-register the event handler', function() {
+      expect(testCallback).not.toHaveBeenCalled();
     });
   });
 
   describe('router.loadCurrentRoute()', function() {
     // Arrange
-    var mockUrl = 'http://domain.com/example/path?queryParam=true';
     var mockRouteArguments = {queryParam: true};
     var MockModule = function() {};
 
     beforeEach(function() {
-      router.config({
-        routes: {
-          route1: {path: '/first/path', moduleId: 'firstModule'},
-          route2: {path: '/second/path', moduleId: 'secondModule'},
-          route3: {path: '/third/path', moduleId: 'thirdModule'}
-        }
+      router.registerRoutes({
+        route1: {path: '/first/path', moduleId: 'firstModule'},
+        route2: {path: '/second/path', moduleId: 'secondModule'},
+        route3: {path: '/third/path', moduleId: 'thirdModule'}
       });
+
       spyOn(router, 'testRoute').and.callFake(function(route) { return route.path === '/second/path'; });
-      spyOn(router, 'currentUrl').and.returnValue(mockUrl);
       spyOn(router, 'routeArguments').and.returnValue(mockRouteArguments);
-      spyOn(router, 'onRouteLoad');
+      spyOn(router, 'fire');
       spyOn(window, 'require').and.callFake(function() {
         // This part of the test isn't precise since it's completely replacing the anonymouse require callback. There's no other
         // way to do this so this will have to do.
-        router.onRouteLoad.call(router, MockModule, router.routeArguments(router.routes.route2, router.currentUrl()));
+        router.fire('routeload', MockModule, router.routeArguments(router.routes.route2, window.location.href));
       });
 
       // Act
@@ -77,7 +170,7 @@ define([
       expect(router.testRoute.calls.argsFor(1)[0]).toBe(router.routes.route2);
     });
 
-    it('should mark the active route as active', function() {
+    it('should mark the matched route as active', function() {
       expect(router.activeRoute).toBe(router.routes.route2);
       expect(router.routes.route2.active).toEqual(true);
     });
@@ -87,35 +180,12 @@ define([
     });
 
     it('should get the route arguments', function() {
-      expect(router.currentUrl).toHaveBeenCalled();
-      expect(router.routeArguments.calls.argsFor(0)).toEqual([router.routes.route2, mockUrl]);
+      expect(router.routeArguments.calls.argsFor(0)).toEqual([router.routes.route2, window.location.href]);
     });
 
-    it('should call router.onRouteLoad(module, routeArguments) when it\'s done loading the route\'s module', function() {
-      expect(router.onRouteLoad.calls.argsFor(0)).toEqual([MockModule, mockRouteArguments]);
-    });
-  });
-
-  describe('router.onUrlChange()', function() {
-    it('should call loadCurrentRoute()', function() {
-      // Arrange
-      spyOn(router, 'loadCurrentRoute');
-
-      // Act
-      router.onUrlChange();
-
-      // Assert
-      expect(router.loadCurrentRoute).toHaveBeenCalled();
-    });
-  });
-
-  describe('router.currentUrl()', function() {
-    it('should return get the current URL from the address bar', function() {
-      // Act
-      var actual = router.currentUrl();
-
-      // Assert
-      expect(actual).toEqual(window.location.href);
+    it('should call router.fire(\'routeload\', module, routeArguments) when it\'s done loading the route\'s module', function() {
+      expect(router.fire).toHaveBeenCalled();
+      expect(router.fire.calls.argsFor(0)).toEqual(['routeload', MockModule, mockRouteArguments]);
     });
   });
 
@@ -187,7 +257,7 @@ define([
     });
   });
 
-  describe('router.testRoute(route)', function() {
+  describe('router.testRoute(route, [url])', function() {
     it('should return true on an exact match', function() {
       spyOn(router, 'urlPath').and.returnValue('/example/path');
       var result = router.testRoute({path: '/example/path'});

@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.6.1
+// Version: 0.7.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -27,53 +27,73 @@ define([], function() {
   'use strict';
 
   // Private closure variables
-  var cachedUrlPaths = {},
-      hasBeenInitialized = false;
+  var cachedUrlPaths = {};
+  var eventHandlers = {
+    statechange: [],
+    routeload: []
+  };
+  var nativeStateEventLisener = function nativeStateEventLisener() {
+    router.fire('statechange');
+  };
 
-  // Public interface
-
-  // There can only be one instance of the router
+  // router public interface
+  //
+  // There can only be one instance of the router.
   var router = {
-    // router.config() - configure the router
+    // router.init([options]) - initializes the router
+    init: function init(options) {
+      if (typeof(options) === 'undefined') options = {};
+
+      // Set up the window popstate or hashchange event listeners. A hashchange also triggers
+      // a popstate event in modern browsers so we only want to listen to one or the other.
+      if (window.addEventListener) {
+        if (window.history && window.history.pushState) {
+          window.addEventListener('popstate', nativeStateEventLisener, false);
+        } else {
+          window.addEventListener('hashchange', nativeStateEventLisener, false);
+        }
+      } else {
+        // IE 8 and lower
+        if (window.history && window.history.pushState) {
+          // Check if pushState was polyfilled
+          window.attachEvent('popstate', nativeStateEventLisener);
+        } else {
+          window.attachEvent('onhashchange', nativeStateEventLisener);
+        }
+      }
+
+      // Call loadCurrentRoute on every statechange event
+      if (options.loadCurrentRouteOnStateChange !== false) {
+        router.on('statechange', function() {
+          router.loadCurrentRoute();
+        });
+      }
+
+      // Trigger the initial statechange event
+      if (options.triggerInitialStateChange !== false) {
+        router.fire('statechange');
+      }
+
+      return router;
+    },
+
+    // router.registerRoutes(routes) - register routes
+    //
+    // This will add the routes to the existing routes. Specifying a route with the same name as
+    // an existing route will overwrite the old route with the new one.
     //
     // Example
-    // router.config({
-    //   routes: {
-    //     home: {path: '/', moduleId: 'home/homeView'},
-    //     customer: {path: '/customer/:id', moduleId: 'customer/customerView'},
-    //     notFound: {path: '*', moduleId: 'notFound/notFoundView'}
-    //   },
-    //   onRouteLoad: function(module, routeArguments) { /** create an instance of the view, render it, and attach it to the document */ }
+    // router.registerRoutes({
+    //   home: {path: '/', moduleId: 'home/homeView'},
+    //   customer: {path: '/customer/:id', moduleId: 'customer/customerView'},
+    //   notFound: {path: '*', moduleId: 'notFound/notFoundView'}
     // })
-    config: function config(properties) {
-      // Copy properties from the config object - this extends the router
-      for (var property in properties) {
-        if (properties.hasOwnProperty(property)) {
-          router[property] = properties[property];
+    registerRoutes: function registerRoutes(routes) {
+      for (var route in routes) {
+        if (routes.hasOwnProperty(route)) {
+          router.routes[route] = routes[route];
         }
       }
-
-      // Set up the window popstate or hashchange event listeners the first time the router is configured. A hashchange
-      // also triggers a popstate event in modern browsers so we only want to listen to one or the other.
-      if (!hasBeenInitialized) {
-        if (window.addEventListener) {
-          if (window.history && window.history.pushState) {
-            window.addEventListener('popstate', router.onUrlChange, false);
-          } else {
-            window.addEventListener('hashchange', router.onUrlChange, false);
-          }
-        } else {
-          // IE 8 and lower
-          if (window.history && window.history.pushState) {
-            // Check if pushState was polyfilled
-            window.attachEvent('popstate', router.onUrlChange);
-          } else {
-            window.attachEvent('onhashchange', router.onUrlChange);
-          }
-        }
-        hasBeenInitialized = true;
-      }
-
       return router;
     },
 
@@ -83,9 +103,33 @@ define([], function() {
     // router.activeRoute - the active route
     activeRoute: {},
 
-    // router.onRouteLoad(module, routeArguments) - Called when RequireJS finishes loading a module for a route
-    onRouteLoad: function onRouteLoad() {
-      throw '`router.onRouteLoad(module, routeArguments)` has not been implemented.';
+    // router.on(eventName, eventHandler([arg1, [arg2]]) {}) - Register an event handler
+    on: function on(eventName, eventHandler) {
+      if (typeof(eventHandlers[eventName]) === 'undefined') eventHandlers[eventName] = [];
+      eventHandlers[eventName].push(eventHandler);
+      return router;
+    },
+
+    // router.fire(eventName, [arg1, [arg2]]) - Fire an event
+    //
+    // This will call all eventName event handlers with the arguments passed in.
+    fire: function fire(eventName) {
+      if (eventHandlers[eventName]) {
+        var eventArguments = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0; i < eventHandlers[eventName].length; i++) {
+          eventHandlers[eventName][i].apply(router, eventArguments);
+        }
+      }
+    },
+
+    // router.off(eventName, eventHandler) - Remove an event handler
+    off: function off(eventName, eventHandler) {
+      if (eventHandlers[eventName]) {
+        var eventHandlerIndex = eventHandlers[eventName].indexOf(eventHandler);
+        if (eventHandlerIndex !== -1) {
+          eventHandlers[eventName].splice(eventHandlerIndex, 1);
+        }
+      }
     },
 
     // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
@@ -107,7 +151,7 @@ define([], function() {
               // finished loading. If we trigger route /a then route /b but /b finishes loading before /a we don't want
               // /a to be rendered since we're actually at route /b.
               if (route.active) {
-                router.onRouteLoad.call(router, module, router.routeArguments(route, router.currentUrl()));
+                router.fire('routeload', module, router.routeArguments(route, window.location.href));
               }
             });
             break;
@@ -117,23 +161,13 @@ define([], function() {
       return router;
     },
 
-    // router.onUrlChange() - called when a hashchange or popstate event is triggered and calls router.loadCurrentRoute()
-    onUrlChange: function onUrlChange() {
-      router.loadCurrentRoute();
-    },
-
-    // router.currentUrl() - gets the current URL from the address bar. You can override this when unit testing.
-    currentUrl: function currentUrl() {
-      return window.location.href;
-    },
-
-    // router.testRoute(route) - determines if the route matches the current URL
+    // router.testRoute(route, [url]) - determines if the route matches the current URL
     //
     // This algorithm tries to fail or succeed as quickly as possible for the most common cases.
-    testRoute: function testRoute(route) {
+    testRoute: function testRoute(route, url) {
       // Example path = '/example/path'
       // Example route: `exampleRoute: {path: '/example/*', moduleId: 'example/exampleView'}`
-      var path = router.urlPath(router.currentUrl());
+      var path = router.urlPath(url || window.location.href);
 
       // If the path is an exact match or '*' then the route is a match
       if (route.path === path || route.path === '*') {
@@ -178,8 +212,12 @@ define([], function() {
       return true;
     },
 
-    // router.routeArguments(route, url) - parse the url to get the route arguments
+    // router.routeArguments([route, [url]]) - parse the url to get the route arguments
+    //
+    // Both parameters are optional.
     routeArguments: function routeArguments(route, url) {
+      if (!route) route = router.activeRoute;
+      if (!url) url = window.location.href;
       var args = {};
       var path = router.urlPath(url);
 

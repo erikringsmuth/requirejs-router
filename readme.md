@@ -22,50 +22,50 @@ define([], function() {
 
   // Load the router
   require(['router'], function(router) {
-    router.config({
-      // Define all of your routes here
-      routes: {
-        // matches an exact path
-        home: { path: '/home', moduleId: 'home/homeView' },
-        
-        // matches using a wildcard
-        customer: { path: '/customer/*', moduleId: 'customer/customerView' },
-        
-        // matches using a path variable
-        order: { path: '/orders/:id', moduleId: 'order/orderView' },
-        
-        // matches a pattern like '/word/number'
-        regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
-        
-        // matches everything else
-        notFound: { path: '*', moduleId: 'notFound/notFoundView' }
-      },
-
-      // When a route loads, render the view and attach it to the document
-      onRouteLoad: function(module, routeArguments) {
-        var body = document.querySelector('body');
-        body.innerHTML = '';
-        body.appendChild(new module(routeArguments).outerEl);
-      }
+    // Register your routes
+    router.registerRoutes({
+      // matches an exact path
+      home: { path: '/home', moduleId: 'home/homeView' },
+      
+      // matches using a wildcard
+      customer: { path: '/customer/*', moduleId: 'customer/customerView' },
+      
+      // matches using a path variable
+      order: { path: '/orders/:id', moduleId: 'order/orderView' },
+      
+      // matches a pattern like '/word/number'
+      regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
+      
+      // matches everything else
+      notFound: { path: '*', moduleId: 'notFound/notFoundView' }
     });
 
-    // Trigger the initial page load
-    router.loadCurrentRoute();
+    // When a route loads, render the view and attach it to the document
+    router.on('routeload', function(module, routeArguments) {
+      var body = document.querySelector('body');
+      body.innerHTML = '';
+      body.appendChild(new module(routeArguments).outerEl);
+    });
+
+    // Set up event handlers and trigger the initial page load
+    router.init();
   });
 });
 ```
 
 ## Router Properties
-- `router.config()` - Configure the router
-- `router.routes` - The routes
-- `router.loadCurrentRoute()` - Tells the router to load the module for the current route
-- `router.onRouteLoad(module, routeArguments)` - Called when the route's AMD module finishes loading
+- `router.routes` - All registered routes
+- `router.registerRoutes(routes)` - Register routes
+- `router.init([options])` - Set up event handlers and trigger the initial page load
+- `router.on('routeload', function(module, routeArguments) {})` - Called when the route's AMD module finishes loading
 - `router.routeArguments(route, url)` - Gets the path variables and query parameter values
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
 - `router.activeRoute` - A reference to the active route - ex: `{path: '/home', moduleId: 'home/homeView'}`
 - `router.testRoute(route)` - Test if the route matches the current URL
-- `router.currentUrl()` - Gets the current URL from the address bar. You can mock this when unit testing.
-- `router.onUrlChange()` - Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`.
+- `router.loadCurrentRoute()` - Manually tell the router to load the module for the current route
+- `router.on('statechange', onStateChangeHandler)` - Called when a hashchange or popstate event is triggered. `init()` adds a `statechange` callback to call `router.loadCurrentRoute()`.
+- `router.fire(eventName, [arg1, [arg2]])` - Manually fire an event
+- `router.off(eventName, eventHandler)` - Remove an event handler
 
 ## routes
 A route has 3 properties
@@ -88,18 +88,31 @@ This is the AMD module ID. This is the ID you would use in a `require` or `defin
 ### route.active
 Indicates if it's the active route. `true` if it's the active route, `false` or `undefined` otherwise. This is set by the router.
 
-## loadCurrentRoute()
-Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `onUrlChange()` any time a hashchange or popstate event is triggered.
+## registerRoutes(routes)
+Registers routes. You can call this multiple times to add additional routes.
 
-## onRouteLoad(module, routeArguments)
-Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. Implement this function in the router config. A simple function like this will do everything you need.
+## init([options])
+Adds `hashchange` and `popstate` event listeners to the window. Sets up a `statechange` event handler to call `loadCurrentRoute()`. Triggers a `statechange` to load the current route. You can optionally set these options.
 
 ```js
-function onRouteLoad(module, routeArguments) {
+init({
+  // If this is false init() won't add a statechange event handler to call loadCurrentRoute()
+  loadCurrentRouteOnStateChange: false,
+
+  // If this is false init() won't trigger a statechange event to load the current route
+  triggerInitialStateChange: false
+});
+```
+
+## on('routeload', function(module, routeArguments) {})
+Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. A simple `routeload` function like this will do everything you need.
+
+```js
+router.on('routeload', function onRouteLoad(module, routeArguments) {
   var body = document.querySelector('body');
   body.innerHTML = '';
   body.appendChild(new module(routeArguments).outerEl);
-}
+});
 ```
 
 ## routeArguments(route, url)
@@ -141,11 +154,17 @@ A reference to the active route. Example: `{path: '/home', moduleId: 'home/homeV
 ## testRoute(route)
 Compares the route against the current URL. Returns `true` if it matches, `false` otherwise.
 
-## currentUrl()
-Gets the current URL from the address bar. You can mock this when unit testing.
+## loadCurrentRoute()
+Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `onUrlChange()` any time a hashchange or popstate event is triggered.
 
-## onUrlChange()
-Called when a hashchange or popstate event is triggered. This calls `router.loadCurrentRoute()`. You can override this if you need a hook to do something before `loadCurrentRoute()` is called.
+## on('statechange', onStateChangeHandler)
+Called when a hashchange or popstate event is triggered. `init()` sets up a `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do something before `loadCurrentRoute()` is called.
+
+## fire(eventName, [arg1, [arg2]])
+Manually fire an event.
+
+## off(eventName, eventHandler)
+Remove an event handler.
 
 ## How to use
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
@@ -160,9 +179,9 @@ Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
-2. A hashchange event is triggered and is intercepted by the router which loads the `'order/orderView'` module
-3. The router calls the `onRouteLoad(module, routeArguments)` with `OrderView` being passed in as the module
-4. Your `onRouteLoad(module, routeArguments)` callback renders the `OrderView` which injects and renders it's `layoutView` and attaches it to the document
+2. A `statechange` event is triggered and the router loads the `'order/orderView'` module
+3. The router calls your `on('routeload', function(module, routeArguments) {})` event handler with `OrderView` being passed in as the module
+4. Your `routeload` event handler renders the `OrderView` which injects and renders it's `layoutView` and attaches it to the document
 
 You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new `OrderView`.
 
@@ -174,11 +193,11 @@ Example framework: [Backbone.js](http://backbonejs.org/)
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
-2. A hashchange event is triggered and is intercepted by the `onUrlChange()`
-3. Override the `onUrlChange()` to call `layoutView.render()` which draws your header, footer, and an empty main-content section. At this point the header has the "Orders" link marked as active `<li class="active"><a href="#/order">Orders</a></li>`.
+2. A `statechange` event is triggered
+3. Set up your custom `on('statechange', eventHandler)` to call `layoutView.render()` which draws your header, footer, and an empty main-content section
 4. The last step in `layoutView.render()` calls `router.loadCurrentRoute()` which uses RequireJS to load the `'order/orderView'` module
-5. When the module finishes loading the `onRouteLoad(module, routeArguments)` is called with `OrderView` being passed in as the module
-6. Your `onRouteLoad(module, routeArguments)` creates a new instance of `OrderView`, renders it, and attaches it to the layoutView's main-content section
+5. When the module finishes loading the `on('routeload', function(module, routeArguments) {})` event handler is called with `OrderView` being passed in as the module
+6. Your `routeload` event handler creates a new instance of `OrderView`, renders it, and attaches it to the layoutView's main-content section
 
 You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `OrderView`.
 
@@ -198,27 +217,35 @@ var LayoutView = Backbone.View.extend({
 // Create one instance of your layout for your entire site
 var layoutView = new LayoutView();
 
-router.config({
-  routes: {
-    home: {path: '/', moduleId: 'home/homeView'},
-    order: {path: '/order', moduleId: 'order/orderView'},
-    notFound: {path: '*', moduleId: 'notFound/notFoundView'}
-  },
-
-  // Re-render the layout before loading the current route's module
-  onUrlChange: function() {
-    layoutView.render.call(layoutView);
-  },
-
-  // Called when the route's module finishes loading
-  onRouteLoad: function(module, routeArguments) {
-    // Attach the child view to the layoutView's main-content section
-    layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
-  }
+router.registerRoutes({
+  home: {path: '/', moduleId: 'home/homeView'},
+  order: {path: '/order', moduleId: 'order/orderView'},
+  notFound: {path: '*', moduleId: 'notFound/notFoundView'}
 });
 
-// Trigger the initial page load
-router.loadCurrentRoute();
+// Re-render the layout before loading the current route's module
+router.on('statechange', function() {
+  layoutView.render.call(layoutView);
+});
+
+// Called when the route's module finishes loading
+router.on('routeload', function(module, routeArguments) {
+  // Attach the child view to the layoutView's main-content section
+  layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
+});
+
+// Set up event handlers
+router.init({
+  // Don't add the default 'statechange' event handler to call loadCurrentRoute() since we're manually
+  // calling it from layoutView.render()
+  loadCurrentRouteOnStateChange: false,
+
+  // Don't trigger the initial 'statechange' event. We will have layout.render() call loadCurrentRoute().
+  triggerInitialStateChange: false
+});
+
+// Render the layout and trigger the initial page load
+layoutView.render();
 ```
 
 The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach almost completely decouples the view rendering from the routing.
