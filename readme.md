@@ -58,12 +58,12 @@ define([], function() {
 - `router.registerRoutes(routes)` - Register routes
 - `router.init([options])` - Set up event handlers and trigger the initial page load
 - `router.on('routeload', function(module, routeArguments) {})` - Called when the route's AMD module finishes loading
-- `router.routeArguments(route, url)` - Gets the path variables and query parameter values
+- `router.routeArguments([route, [url]])` - Gets the path variables and query parameter values
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
 - `router.activeRoute` - A reference to the active route - ex: `{path: '/home', moduleId: 'home/homeView'}`
-- `router.testRoute(route)` - Test if the route matches the current URL
+- `router.testRoute(route, [url])` - Test if the route matches the current URL
 - `router.loadCurrentRoute()` - Manually tell the router to load the module for the current route
-- `router.on('statechange', onStateChangeHandler)` - Called when a hashchange or popstate event is triggered. `init()` adds a `statechange` callback to call `router.loadCurrentRoute()`.
+- `router.on('statechange', onStateChangeHandler)` - Called when a hashchange or popstate event is triggered. `init()` adds a default `statechange` callback to call `router.loadCurrentRoute()`.
 - `router.fire(eventName, [arg1, [arg2]])` - Manually fire an event
 - `router.off(eventName, eventHandler)` - Remove an event handler
 
@@ -91,8 +91,15 @@ Indicates if it's the active route. `true` if it's the active route, `false` or 
 ## registerRoutes(routes)
 Registers routes. You can call this multiple times to add additional routes.
 
+```js
+router.registerRoutes({
+  home: { path: '/home', moduleId: 'home/homeView' },
+  notFound: { path: '*', moduleId: 'notFound/notFoundView' }
+});
+```
+
 ## init([options])
-Adds `hashchange` and `popstate` event listeners to the window. Sets up a `statechange` event handler to call `loadCurrentRoute()`. Triggers a `statechange` to load the current route. You can optionally set these options.
+Adds `hashchange` and `popstate` event listeners to the window. These are consolidated into a `statechange` event that is used by the router. `init()` then sets up a default `statechange` event handler to call `loadCurrentRoute()`. Finally it triggers a `statechange` to load the current route. You can set these options to prevent some of the default behavior.
 
 ```js
 init({
@@ -108,14 +115,16 @@ init({
 Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. A simple `routeload` function like this will do everything you need.
 
 ```js
-router.on('routeload', function onRouteLoad(module, routeArguments) {
+router.on('routeload', function(module, routeArguments) {
   var body = document.querySelector('body');
   body.innerHTML = '';
   body.appendChild(new module(routeArguments).outerEl);
 });
 ```
 
-## routeArguments(route, url)
+## routeArguments([route, [url]])
+
+You can call `routeArguments()` without any parameters to get the route arguments for the current route.
 
 Route arguments contain path variables and query parameters. For example:
 ```js
@@ -158,7 +167,7 @@ Compares the route against the current URL. Returns `true` if it matches, `false
 Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `onUrlChange()` any time a hashchange or popstate event is triggered.
 
 ## on('statechange', onStateChangeHandler)
-Called when a hashchange or popstate event is triggered. `init()` sets up a `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do something before `loadCurrentRoute()` is called.
+Called when a hashchange or popstate event is triggered. `init()` sets up a default `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do something before `loadCurrentRoute()` is called.
 
 ## fire(eventName, [arg1, [arg2]])
 Manually fire an event.
@@ -223,7 +232,7 @@ router.registerRoutes({
   notFound: {path: '*', moduleId: 'notFound/notFoundView'}
 });
 
-// Re-render the layout before loading the current route's module
+// Render the layout before loading the current route's module
 router.on('statechange', function() {
   layoutView.render.call(layoutView);
 });
@@ -234,18 +243,12 @@ router.on('routeload', function(module, routeArguments) {
   layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
 });
 
-// Set up event handlers
+// Set up event handlers and trigger the initial 'statechange' event
 router.init({
   // Don't add the default 'statechange' event handler to call loadCurrentRoute() since we're manually
   // calling it from layoutView.render()
-  loadCurrentRouteOnStateChange: false,
-
-  // Don't trigger the initial 'statechange' event. We will have layout.render() call loadCurrentRoute().
-  triggerInitialStateChange: false
+  loadCurrentRouteOnStateChange: false
 });
-
-// Render the layout and trigger the initial page load
-layoutView.render();
 ```
 
 The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach almost completely decouples the view rendering from the routing.
