@@ -7,7 +7,7 @@ The router works with `hashchange` and HTML5 `pushState`. One set of routes will
 
 ## Configuration
 
-Here's an example `main.js` using the RequireJS Router to run your app.
+Here's an example `main.js` using the RequireJS Router to run the app.
 ```js
 define([], function() {
   'use strict';
@@ -57,13 +57,13 @@ define([], function() {
 - `router.routes` - All registered routes
 - `router.registerRoutes(routes)` - Register routes
 - `router.init([options])` - Set up event handlers and trigger the initial page load
-- `router.on('routeload', function(module, routeArguments) {})` - Called when the route's AMD module finishes loading
+- `router.on('routeload', routeLoadedCallback)` - Called when the route's AMD module finishes loading
 - `router.routeArguments([route, [url]])` - Gets the path variables and query parameter values
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
-- `router.activeRoute` - A reference to the active route - ex: `{path: '/home', moduleId: 'home/homeView'}`
+- `router.activeRoute` - A reference to the active route `{path: '/home', moduleId: 'home/homeView'}`
 - `router.testRoute(route, [url])` - Test if the route matches the current URL
 - `router.loadCurrentRoute()` - Manually tell the router to load the module for the current route
-- `router.on('statechange', onStateChangeHandler)` - Called when a hashchange or popstate event is triggered. `init()` adds a default `statechange` callback to call `router.loadCurrentRoute()`.
+- `router.on('statechange', onStateChangeCallback)` - Called when a hashchange or popstate event is triggered
 - `router.fire(eventName, [arg1, [arg2]])` - Manually fire an event
 - `router.off(eventName, eventHandler)` - Remove an event handler
 
@@ -111,7 +111,7 @@ init({
 });
 ```
 
-## on('routeload', function(module, routeArguments) {})
+## on('routeload', routeLoadedCallback)
 Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. A simple `routeload` function like this will do everything you need.
 
 ```js
@@ -160,11 +160,11 @@ The 4th URL example ignores the normal path and query parameters since it has a 
 ## activeRoute
 A reference to the active route. Example: `{path: '/home', moduleId: 'home/homeView'}`
 
-## testRoute(route)
+## testRoute(route, [url])
 Compares the route against the current URL. Returns `true` if it matches, `false` otherwise.
 
 ## loadCurrentRoute()
-Tells the router to load the module for the current route. Use this to trigger the initial page load. This will also get called by the `onUrlChange()` any time a hashchange or popstate event is triggered.
+Tells the router to load the module for the current route. This is called by the `on('statechange', onStateChangeHandler)` any time a hashchange or popstate event is triggered.
 
 ## on('statechange', onStateChangeHandler)
 Called when a hashchange or popstate event is triggered. `init()` sets up a default `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do something before `loadCurrentRoute()` is called.
