@@ -226,6 +226,7 @@ var LayoutView = Backbone.View.extend({
 // Create one instance of your layout for your entire site
 var layoutView = new LayoutView();
 
+// Register your routes
 router.registerRoutes({
   home: {path: '/', moduleId: 'home/homeView'},
   order: {path: '/order', moduleId: 'order/orderView'},
@@ -245,8 +246,8 @@ router.on('routeload', function(module, routeArguments) {
 
 // Set up event handlers and trigger the initial 'statechange' event
 router.init({
-  // Don't add the default 'statechange' event handler to call loadCurrentRoute() since we're manually
-  // calling it from layoutView.render()
+  // Don't add the default 'statechange' event handler to call loadCurrentRoute() since
+  // we're manually calling it from layoutView.render()
   loadCurrentRouteOnStateChange: false
 });
 ```
