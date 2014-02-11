@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.7.0
+// Version: 0.7.1
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -32,8 +32,29 @@ define([], function() {
     statechange: [],
     routeload: []
   };
-  var nativeStateEventLisener = function nativeStateEventLisener() {
-    router.fire('statechange');
+
+  // In some modern browsers a hashchange also triggers a popstate. There isn't a check to see if the
+  // browser will trigger one or both. We have to do some counting to keep track of the correct event
+  // to listen to.
+  var popstateCount = 0;
+  var hashchangeCount = 0;
+  var popstateEventLisener = function popstateEventLisener() {
+    if (popstateCount >= hashchangeCount) {
+      popstateCount = popstateCount + 1;
+      router.fire('statechange');
+    } else {
+      // Too late, hashchange triggered first
+      popstateCount = hashchangeCount;
+    }
+  };
+  var hashchangeEventLisener = function hashchangeEventLisener() {
+    if (hashchangeCount >= popstateCount) {
+      hashchangeCount = hashchangeCount + 1;
+      router.fire('statechange');
+    } else {
+      // Too late, popstate triggered first
+      hashchangeCount = popstateCount;
+    }
   };
 
   // router public interface
@@ -44,22 +65,14 @@ define([], function() {
     init: function init(options) {
       if (typeof(options) === 'undefined') options = {};
 
-      // Set up the window popstate or hashchange event listeners. A hashchange also triggers
-      // a popstate event in modern browsers so we only want to listen to one or the other.
+      // Set up the window popstate and hashchange event listeners
       if (window.addEventListener) {
-        if (window.history && window.history.pushState) {
-          window.addEventListener('popstate', nativeStateEventLisener, false);
-        } else {
-          window.addEventListener('hashchange', nativeStateEventLisener, false);
-        }
+        window.addEventListener('popstate', popstateEventLisener, false);
+        window.addEventListener('hashchange', hashchangeEventLisener, false);
       } else {
         // IE 8 and lower
-        if (window.history && window.history.pushState) {
-          // Check if pushState was polyfilled
-          window.attachEvent('popstate', nativeStateEventLisener);
-        } else {
-          window.attachEvent('onhashchange', nativeStateEventLisener);
-        }
+        window.attachEvent('popstate', popstateEventLisener); // In case pushState has been polyfilled
+        window.attachEvent('onhashchange', hashchangeEventLisener);
       }
 
       // Call loadCurrentRoute on every statechange event
