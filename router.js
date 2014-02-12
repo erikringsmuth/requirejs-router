@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.7.1
+// Version: 0.7.2
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -34,26 +34,13 @@ define([], function() {
   };
 
   // In some modern browsers a hashchange also triggers a popstate. There isn't a check to see if the
-  // browser will trigger one or both. We have to do some counting to keep track of the correct event
-  // to listen to.
-  var popstateCount = 0;
-  var hashchangeCount = 0;
-  var popstateEventLisener = function popstateEventLisener() {
-    if (popstateCount >= hashchangeCount) {
-      popstateCount = popstateCount + 1;
+  // browser will trigger one or both. We have to keep track of the previous state to prevent it from
+  // triggering a statechange twice.
+  var previousState = '';
+  var popstateHashchangeEventLisener = function popstateHashchangeEventLisener() {
+    if (previousState != window.location.href) {
+      previousState = window.location.href;
       router.fire('statechange');
-    } else {
-      // Too late, hashchange triggered first
-      popstateCount = hashchangeCount;
-    }
-  };
-  var hashchangeEventLisener = function hashchangeEventLisener() {
-    if (hashchangeCount >= popstateCount) {
-      hashchangeCount = hashchangeCount + 1;
-      router.fire('statechange');
-    } else {
-      // Too late, popstate triggered first
-      hashchangeCount = popstateCount;
     }
   };
 
@@ -67,17 +54,17 @@ define([], function() {
 
       // Set up the window popstate and hashchange event listeners
       if (window.addEventListener) {
-        window.addEventListener('popstate', popstateEventLisener, false);
-        window.addEventListener('hashchange', hashchangeEventLisener, false);
+        window.addEventListener('popstate', popstateHashchangeEventLisener, false);
+        window.addEventListener('hashchange', popstateHashchangeEventLisener, false);
       } else {
         // IE 8 and lower
-        window.attachEvent('popstate', popstateEventLisener); // In case pushState has been polyfilled
-        window.attachEvent('onhashchange', hashchangeEventLisener);
+        window.attachEvent('popstate', popstateHashchangeEventLisener); // In case pushState has been polyfilled
+        window.attachEvent('onhashchange', popstateHashchangeEventLisener);
       }
 
       // Call loadCurrentRoute on every statechange event
       if (options.loadCurrentRouteOnStateChange !== false) {
-        router.on('statechange', function() {
+        router.on('statechange', function onstatechange() {
           router.loadCurrentRoute();
         });
       }
