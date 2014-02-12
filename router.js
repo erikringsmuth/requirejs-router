@@ -33,8 +33,8 @@ define([], function() {
     routeload: []
   };
 
-  // In some modern browsers a hashchange also triggers a popstate. There isn't a check to see if the browser will
-  // trigger one or both. We have to keep track of the previous state to prevent it from triggering a statechange twice.
+  // In some modern browsers a hashchange also fires a popstate. There isn't a check to see if the browser will fire
+  // one or both. We have to keep track of the previous state to prevent it from fireing a statechange twice.
   var previousState = '';
   var popstateHashchangeEventLisener = function popstateHashchangeEventLisener() {
     if (previousState != window.location.href) {
@@ -68,8 +68,8 @@ define([], function() {
         });
       }
 
-      // Trigger the initial statechange event
-      if (options.triggerInitialStateChange !== false) {
+      // Fire the initial statechange event
+      if (options.fireInitialStateChange !== false) {
         router.fire('statechange');
       }
 
@@ -153,9 +153,9 @@ define([], function() {
             // Load the route's module
             require([route.moduleId], function(module) {
               // Make sure this is still the active route from when loadCurrentRoute was called. The asynchronous nature
-              // of AMD loaders means we could have triggered multiple hashchanges or popstates before the AMD module
-              // finished loading. If we trigger route /a then route /b but /b finishes loading before /a we don't want
-              // /a to be rendered since we're actually at route /b.
+              // of AMD loaders means we could have fireed multiple hashchanges or popstates before the AMD module finished
+              // loading. If we navigate to route /a then navigate to route /b but /b finishes loading before /a we don't
+              // want /a to be rendered since we're actually at route /b.
               if (route.active) {
                 router.fire('routeload', module, router.routeArguments(route, window.location.href));
               }

@@ -53,17 +53,19 @@ define([], function() {
 });
 ```
 
+There is only one instance of the router. Loading the router in multiple AMD modules will always load the same router.
+
 ## Router Properties
 - `router.routes` - All registered routes
-- `router.registerRoutes(routes)` - Register routes
+- `router.registerRoutes(routes)` - Register your routes
 - `router.init([options])` - Set up event handlers and trigger the initial page load
 - `router.on('routeload', routeLoadedCallback)` - Called when the route's AMD module finishes loading
-- `router.routeArguments([route, [url]])` - Gets the path variables and query parameter values
+- `router.routeArguments([route, [url]])` - Returns an object with the path variables and query parameter values from the URL
 - `router.urlPath(url)` - Returns the hash path if it exists otherwise returns the normal path
 - `router.activeRoute` - A reference to the active route `{path: '/home', moduleId: 'home/homeView'}`
-- `router.testRoute(route, [url])` - Test if the route matches the current URL
 - `router.loadCurrentRoute()` - Manually tell the router to load the module for the current route
-- `router.on('statechange', onStateChangeCallback)` - Called when a hashchange or popstate event is triggered
+- `router.testRoute(route, [url])` - Test if the route matches the current URL
+- `router.on('statechange', onStateChangeCallback)` - Called when a hashchange or popstate event is fired
 - `router.fire(eventName, [arg1, [arg2]])` - Manually fire an event
 - `router.off(eventName, eventHandler)` - Remove an event handler
 
@@ -99,15 +101,15 @@ router.registerRoutes({
 ```
 
 ## init([options])
-Adds `hashchange` and `popstate` event listeners to the window. These are consolidated into a `statechange` event that is used by the router. `init()` then sets up a default `statechange` event handler to call `loadCurrentRoute()`. Finally it triggers a `statechange` to load the current route. You can set these options to prevent some of the default behavior.
+Adds `hashchange` and `popstate` event listeners to the window. These are consolidated into a `statechange` event that is used by the router. `init()` then sets up a default `statechange` event handler to call `loadCurrentRoute()`. Finally it fires a `statechange` to load the current route. You can set these options to prevent some of the default behavior.
 
 ```js
 init({
   // If this is false init() won't add a statechange event handler to call loadCurrentRoute()
   loadCurrentRouteOnStateChange: false,
 
-  // If this is false init() won't trigger a statechange event to load the current route
-  triggerInitialStateChange: false
+  // If this is false init() won't fire a statechange event to load the current route
+  fireInitialStateChange: false
 });
 ```
 
@@ -160,20 +162,20 @@ The 4th URL example ignores the normal path and query parameters since it has a 
 ## activeRoute
 A reference to the active route. Example: `{path: '/home', moduleId: 'home/homeView'}`
 
+## loadCurrentRoute()
+Tells the router to load the module for the current route. This is called by the default `on('statechange', onStateChangeHandler)` any time a hashchange or popstate event is fired.
+
 ## testRoute(route, [url])
 Compares the route against the current URL. Returns `true` if it matches, `false` otherwise.
 
-## loadCurrentRoute()
-Tells the router to load the module for the current route. This is called by the `on('statechange', onStateChangeHandler)` any time a hashchange or popstate event is triggered.
-
 ## on('statechange', onStateChangeHandler)
-Called when a hashchange or popstate event is triggered. `init()` sets up a default `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do something before `loadCurrentRoute()` is called.
+Called when a hashchange or popstate event is fired. `init()` sets up a default `statechange` event handler that calls `loadCurrentRoute()`. You can pass an option to `init()` to override this if you need to write your own `statechange` handler to do custom logic before `loadCurrentRoute()` is called.
 
 ## fire(eventName, [arg1, [arg2]])
-Manually fire an event.
+Manually fire an event. The router fires `statechange` and `routeload` events. `statechange` is called when the browser fires a `hashchange` or `popstate`. `routeload` is called when the router finishes loading a module for a route. Use `routeload` to render your view.
 
 ## off(eventName, eventHandler)
-Remove an event handler.
+Remove an event handler. If you want remove an event handler you need to keep a reference to it so you can tell router.off() with the original event handler.
 
 ## How to use
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
@@ -188,7 +190,7 @@ Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
-2. A `statechange` event is triggered and the router loads the `'order/orderView'` module
+2. A `statechange` event is fired and the router loads the `'order/orderView'` module
 3. The router calls your `on('routeload', function(module, routeArguments) {})` event handler with `OrderView` being passed in as the module
 4. Your `routeload` event handler renders the `OrderView` which injects and renders it's `layoutView` and attaches it to the document
 
@@ -202,7 +204,7 @@ Example framework: [Backbone.js](http://backbonejs.org/)
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
-2. A `statechange` event is triggered
+2. A `statechange` event is fired
 3. Set up your custom `on('statechange', eventHandler)` to call `layoutView.render()` which draws your header, footer, and an empty main-content section
 4. The last step in `layoutView.render()` calls `router.loadCurrentRoute()` which uses RequireJS to load the `'order/orderView'` module
 5. When the module finishes loading the `on('routeload', function(module, routeArguments) {})` event handler is called with `OrderView` being passed in as the module
@@ -244,7 +246,7 @@ router.on('routeload', function(module, routeArguments) {
   layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
 });
 
-// Set up event handlers and trigger the initial 'statechange' event
+// Set up event handlers and fire the initial 'statechange' event
 router.init({
   // Don't add the default 'statechange' event handler to call loadCurrentRoute() since
   // we're manually calling it from layoutView.render()
@@ -260,13 +262,13 @@ The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.
 ## Navigation
 The RequireJS router does not re-implement the existing navigation capabilities of browsers. There are three ways to trigger a page load. `hashchange`, `popstate`, or a page load.
 
-If you are using `hashchange` you don't need to do anything. Clicking a link `<a href="#/new/page">New Page</a>` will trigger a `hashchange` event and tell the router to load the new route. You don't need to do anything with this event in your Javascript.
+If you are using `hashchange` you don't need to do anything. Clicking a link `<a href="#/new/page">New Page</a>` will fire a `hashchange` event and tell the router to load the new route. You don't need to do anything with this event in your Javascript.
 
 If you are using HTML5 `pushState` you need one extra step. The `pushState()` method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use `pushState()` to navigate to another route you need to call it like this.
 
 ```js
 history.pushState(stateObj, title, url); // push a new URL into the history stack
-history.go(0); // go to the current state in the history stack, this triggers a popstate event
+history.go(0); // go to the current state in the history stack, this fires a popstate event
 ```
 
 You can also do a normal page load which will call `router.loadCurrentRoute()` in `main.js`.
