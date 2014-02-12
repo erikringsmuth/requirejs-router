@@ -180,9 +180,9 @@ Remove an event handler. If you want remove an event handler you need to keep a 
 ## How to use
 There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
 
-There are two ways MV* frameworks handle routing and rendering. You can have `main.js` render your layout (header, footer, etc.) then use the router to load the content view and insert it into the layout. This is the top-down approach.
+There are two ways MV* frameworks handle routing and rendering views. The most common way is to have `main.js` start the app which renders the layout (header, footer, etc.). Once the layout is rendered the router loads the content view and attaches it to the layout. This is the top-down approach.
 
-Alternatively you can have `main.js` directly load the content view and have the content view inject the layout. This is the IoC approach. This is the simplest and most dynamic approach.
+Alternatively you can have `main.js` directly load the content view and have the content view inject the layout. This is the IoC approach. The layout is now completely decoupled from the router. This is the simplest and most dynamic approach.
 
 ### IoC approach
 Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
@@ -254,7 +254,7 @@ router.init({
 });
 ```
 
-The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach almost completely decouples the view rendering from the routing.
+The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach completely decouples the rendering from the routing.
 
 ## Demo Site
 The RequireJS Router was written alongside [nex-js](http://erikringsmuth.github.io/nex-js/). The site's source is available in the [gh-pages branch of nex-js](https://github.com/erikringsmuth/nex-js/tree/gh-pages). The router is configured in [/js/main.js](https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js). Both nex-js and the RequireJS Router are licensed under MIT.
