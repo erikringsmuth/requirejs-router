@@ -33,9 +33,8 @@ define([], function() {
     routeload: []
   };
 
-  // In some modern browsers a hashchange also triggers a popstate. There isn't a check to see if the
-  // browser will trigger one or both. We have to keep track of the previous state to prevent it from
-  // triggering a statechange twice.
+  // In some modern browsers a hashchange also triggers a popstate. There isn't a check to see if the browser will
+  // trigger one or both. We have to keep track of the previous state to prevent it from triggering a statechange twice.
   var previousState = '';
   var popstateHashchangeEventLisener = function popstateHashchangeEventLisener() {
     if (previousState != window.location.href) {
@@ -46,7 +45,7 @@ define([], function() {
 
   // router public interface
   //
-  // There can only be one instance of the router.
+  // There is only one instance of the router. Loading it in multiple modules will always load the same router.
   var router = {
     // router.init([options]) - initializes the router
     init: function init(options) {
@@ -77,10 +76,16 @@ define([], function() {
       return router;
     },
 
-    // router.registerRoutes(routes) - register routes
+    // router.routes - All registered routes
+    routes: {},
+
+    // router.activeRoute - A reference to the active route
+    activeRoute: {},
+
+    // router.registerRoutes(routes) - Register routes
     //
-    // This will add the routes to the existing routes. Specifying a route with the same name as
-    // an existing route will overwrite the old route with the new one.
+    // This will add the routes to the existing routes. Specifying a route with the same name as an existing route will
+    // overwrite the old route with the new one.
     //
     // Example
     // router.registerRoutes({
@@ -97,13 +102,9 @@ define([], function() {
       return router;
     },
 
-    // router.routes - all defined routes
-    routes: {},
-
-    // router.activeRoute - the active route
-    activeRoute: {},
-
     // router.on(eventName, eventHandler([arg1, [arg2]]) {}) - Register an event handler
+    //
+    // The two main events are 'statechange' and 'routeload'.
     on: function on(eventName, eventHandler) {
       if (typeof(eventHandlers[eventName]) === 'undefined') eventHandlers[eventName] = [];
       eventHandlers[eventName].push(eventHandler);
@@ -120,9 +121,13 @@ define([], function() {
           eventHandlers[eventName][i].apply(router, eventArguments);
         }
       }
+      return router;
     },
 
     // router.off(eventName, eventHandler) - Remove an event handler
+    //
+    // If you want remove an event handler you need to keep a reference to it so you can tell router.off() with the
+    // original event handler.
     off: function off(eventName, eventHandler) {
       if (eventHandlers[eventName]) {
         var eventHandlerIndex = eventHandlers[eventName].indexOf(eventHandler);
@@ -130,9 +135,10 @@ define([], function() {
           eventHandlers[eventName].splice(eventHandlerIndex, 1);
         }
       }
+      return router;
     },
 
-    // router.loadCurrentRoute() - triggers RequireJS to load the module for the current route
+    // router.loadCurrentRoute() - Manually tell the router to load the module for the current route
     loadCurrentRoute: function loadCurrentRoute() {
       for (var i in router.routes) {
         if (router.routes.hasOwnProperty(i)) {
@@ -161,7 +167,50 @@ define([], function() {
       return router;
     },
 
-    // router.testRoute(route, [url]) - determines if the route matches the current URL
+    // urlPath(url) - Parses the url to get the path
+    //
+    // This will return the hash path if it exists or return the real path if no hash path exists.
+    //
+    // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+    // path = '/example/path'
+    //
+    // Note: The URL must contain the protocol like 'http(s)://'
+    urlPath: function urlPath(url) {
+      // Check the cache to see if we've already parsed this URL
+      if (typeof(cachedUrlPaths[url]) !== 'undefined') {
+        return cachedUrlPaths[url];
+      }
+
+      // The relative URI is everything after the third slash including the third slash
+      // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
+      var splitUrl = url.split('/');
+      var relativeUri = '/' + splitUrl.splice(3, splitUrl.length - 3).join('/');
+
+      // The path is everything in the relative URI up to the first ? or #
+      // Example path = '/other/path'
+      var path = relativeUri.split(/[\?#]/)[0];
+
+      // The hash is everything from the first # up to the the search starting with ? if it exists
+      // Example hash = '#/example/path'
+      var hashIndex = relativeUri.indexOf('#');
+      if (hashIndex !== -1) {
+        var hash = relativeUri.substring(hashIndex).split('?')[0];
+        if (hash.substring(0, 2) === '#/') {
+          // Hash path
+          path = hash.substring(1);
+        } else if (hash.substring(0, 3) === '#!/') {
+          // Hashbang path
+          path = hash.substring(2);
+        }
+      }
+
+      // Cache the path for this URL
+      cachedUrlPaths[url] = path;
+
+      return path;
+    },
+
+    // router.testRoute(route, [url]) - Test if the route matches the current URL
     //
     // This algorithm tries to fail or succeed as quickly as possible for the most common cases.
     testRoute: function testRoute(route, url) {
@@ -212,7 +261,7 @@ define([], function() {
       return true;
     },
 
-    // router.routeArguments([route, [url]]) - parse the url to get the route arguments
+    // router.routeArguments([route, [url]]) - Gets the path variables and query parameter values from the URL
     //
     // Both parameters are optional.
     routeArguments: function routeArguments(route, url) {
@@ -300,49 +349,6 @@ define([], function() {
       }
 
       return args;
-    },
-
-    // urlPath(url) - parses the url to get the path
-    //
-    // This will return the hash path if it exists or return the real path if no hash path exists
-    //
-    // Example URL = 'http://domain.com/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-    // path = '/example/path'
-    //
-    // Note: The URL must contain the protocol like 'http(s)://'
-    urlPath: function urlPath(url) {
-      // Check the cache to see if we've already parsed this URL
-      if (typeof(cachedUrlPaths[url]) !== 'undefined') {
-        return cachedUrlPaths[url];
-      }
-
-      // The relative URI is everything after the third slash including the third slash
-      // Example relativeUri = '/other/path?queryParam3=false#/example/path?queryParam1=true&queryParam2=example%20string'
-      var splitUrl = url.split('/');
-      var relativeUri = '/' + splitUrl.splice(3, splitUrl.length - 3).join('/');
-
-      // The path is everything in the relative URI up to the first ? or #
-      // Example path = '/other/path'
-      var path = relativeUri.split(/[\?#]/)[0];
-
-      // The hash is everything from the first # up to the the search starting with ? if it exists
-      // Example hash = '#/example/path'
-      var hashIndex = relativeUri.indexOf('#');
-      if (hashIndex !== -1) {
-        var hash = relativeUri.substring(hashIndex).split('?')[0];
-        if (hash.substring(0, 2) === '#/') {
-          // Hash path
-          path = hash.substring(1);
-        } else if (hash.substring(0, 3) === '#!/') {
-          // Hashbang path
-          path = hash.substring(2);
-        }
-      }
-
-      // Cache the path for this URL
-      cachedUrlPaths[url] = path;
-
-      return path;
     }
   };
 
