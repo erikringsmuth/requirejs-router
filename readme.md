@@ -222,8 +222,8 @@ define([], function() {
   // Load the router and your layout
   require(['router', 'js/layout/layoutView'], function(router, LayoutView) {
     var layoutView = new LayoutView();
-    // The layout's render method should draw the header, footer, and an empty main-content section then
-    // load the content section.
+    // The layout's render method should draw the header, footer, and an empty main-content section
+    // then load the content section.
     // render: function() {
     //   this.$el.html(this.template({model: this.model}));
     //   router.loadCurrentRoute();
