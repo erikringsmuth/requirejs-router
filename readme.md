@@ -22,38 +22,35 @@ define([], function() {
 
   // Load the router
   require(['router'], function(router) {
-    // Register your routes
-    router.registerRoutes({
-      // matches an exact path
-      home: { path: '/home', moduleId: 'home/homeView' },
-      
-      // matches using a wildcard
-      customer: { path: '/customer/*', moduleId: 'customer/customerView' },
-      
-      // matches using a path variable
-      order: { path: '/orders/:id', moduleId: 'order/orderView' },
-      
-      // matches a pattern like '/word/number'
-      regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
-      
-      // matches everything else
-      notFound: { path: '*', moduleId: 'notFound/notFoundView' }
-    });
-
-    // When a route loads, render the view and attach it to the document
-    router.on('routeload', function(module, routeArguments) {
-      var body = document.querySelector('body');
-      body.innerHTML = '';
-      body.appendChild(new module(routeArguments).outerEl);
-    });
-
-    // Set up event handlers and trigger the initial page load
-    router.init();
+    router
+      .registerRoutes({
+        // matches an exact path
+        home: { path: '/home', moduleId: 'home/homeView' },
+        
+        // matches using a wildcard
+        customer: { path: '/customer/*', moduleId: 'customer/customerView' },
+        
+        // matches using a path variable
+        order: { path: '/orders/:id', moduleId: 'order/orderView' },
+        
+        // matches a pattern like '/word/number'
+        regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
+        
+        // matches everything else
+        notFound: { path: '*', moduleId: 'notFound/notFoundView' }
+      })
+      .on('routeload', function(module, routeArguments) {
+        // When a route loads, render the view and attach it to the document
+        var body = document.querySelector('body');
+        body.innerHTML = '';
+        body.appendChild(new module(routeArguments).outerEl);
+      })
+      .init(); // Set up event handlers and trigger the initial page load
   });
 });
 ```
 
-There is only one instance of the router. Loading the router in multiple AMD modules will always load the same router.
+There is only one instance of the router. Loading the router in multiple AMD modules will reference the same router. This lets you listen to and fire `statechange` and `routeload` events using `router.on()` and `router.fire()`.
 
 ## Router Properties
 - `router.routes` - All registered routes
@@ -104,7 +101,7 @@ router.registerRoutes({
 Adds `hashchange` and `popstate` event listeners to the window. These are consolidated into a `statechange` event that is used by the router. `init()` then sets up a default `statechange` event handler to call `loadCurrentRoute()`. Finally it fires a `statechange` to load the current route. You can set these options to prevent some of the default behavior.
 
 ```js
-init({
+router.init({
   // If this is false init() won't add a statechange event handler to call loadCurrentRoute()
   loadCurrentRouteOnStateChange: false,
 
@@ -178,11 +175,9 @@ Manually fire an event. The router fires `statechange` and `routeload` events. `
 Remove an event handler. If you want remove an event handler you need to keep a reference to it so you can tell router.off() with the original event handler.
 
 ## How to use
-There is only one instance of the router. Using RequireJS to load the router in multiple modules will always load the same router.
+There are two ways JavaScript frameworks handle routing and rendering views. The most common way is to have `main.js` start the app which renders the layout (header, footer, etc.). Once the layout is rendered the router loads the content view and attaches it to the layout. This is the top-down approach.
 
-There are two ways MV* frameworks handle routing and rendering views. The most common way is to have `main.js` start the app which renders the layout (header, footer, etc.). Once the layout is rendered the router loads the content view and attaches it to the layout. This is the top-down approach.
-
-Alternatively you can have `main.js` directly load the content view and have the content view inject the layout. This is the IoC approach. The layout is now completely decoupled from the router. This is the simplest and most dynamic approach.
+Alternatively you can have `main.js` directly load the content view and have the content view inject the layout. This is the IoC approach. The layout is completely decoupled from the router. This is the simplest and most dynamic approach.
 
 ### IoC approach
 Example framework: [nex-js](http://erikringsmuth.github.io/nex-js/)
@@ -191,12 +186,12 @@ Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
 2. A `statechange` event is fired and the router loads the `'order/orderView'` module
-3. The router calls your `on('routeload', function(module, routeArguments) {})` event handler with `OrderView` being passed in as the module
-4. Your `routeload` event handler renders the `OrderView` which injects and renders it's `layoutView` and attaches it to the document
+3. The router calls `on('routeload', function(module, routeArguments) {})` with `OrderView` passed as the module
+4. Your `routeload` event handler renders the `OrderView`, injects it's `layoutView`, and attaches it to the document
 
 You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new `OrderView`.
 
-Look at the `main.js` configuration at the top of this document for an example setup.
+Look at the [`main.js` configuration](#configuration) at the top of this document for an example setup.
 
 ### Top-down approach
 Example framework: [Backbone.js](http://backbonejs.org/)
@@ -204,54 +199,57 @@ Example framework: [Backbone.js](http://backbonejs.org/)
 Here's an example ineraction:
 
 1. The user clicks a link in the header `<li><a href="#/order">Orders</a></li>`
-2. A `statechange` event is fired
-3. Set up your custom `on('statechange', eventHandler)` to call `layoutView.render()` which draws your header, footer, and an empty main-content section
-4. The last step in `layoutView.render()` calls `router.loadCurrentRoute()` which uses RequireJS to load the `'order/orderView'` module
-5. When the module finishes loading the `on('routeload', function(module, routeArguments) {})` event handler is called with `OrderView` being passed in as the module
-6. Your `routeload` event handler creates a new instance of `OrderView`, renders it, and attaches it to the layoutView's main-content section
+2. A `statechange` event is fired and your custom `on('statechange', eventHandler)` calls `layoutView.render()` which draws your header, footer, and an empty main-content section
+3. `layoutView.render()` calls `router.loadCurrentRoute()` which loads the `'order/orderView'` module
+4. The router calls `on('routeload', function(module, routeArguments) {})` with `OrderView` passed as the module
+5. Your `routeload` event handler renders the `OrderView` and attaches it to the `layoutView`'s main-content section
 
-You're done. The layoutView is re-rendered with the header links updated and the main-content section populated with a new `OrderView`.
+You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new `OrderView`.
 
-Here's an example router and layout view setup with the top-down approach.
+Here's an example `main.js` using the router and a layout view with the top-down approach.
 ```js
-var LayoutView = Backbone.View.extend({
-  // Draw the header, footer, and an empty main-content section
-  render: function() {
-    this.$el.html(this.template({model: this.model}));
+define([], function() {
+  'use strict';
 
-    // Then load the route when the layout is done being rendered
-    router.loadCurrentRoute();
-    return this;
-  }
-});
+  // Configure require.js paths and shims
+  require.config({
+    paths: {
+      'text': 'bower_components/requirejs-text/text',
+      'router': 'bower_components/requirejs-router/router'
+    }
+  });
 
-// Create one instance of your layout for your entire site
-var layoutView = new LayoutView();
-
-// Register your routes
-router.registerRoutes({
-  home: {path: '/', moduleId: 'home/homeView'},
-  order: {path: '/order', moduleId: 'order/orderView'},
-  notFound: {path: '*', moduleId: 'notFound/notFoundView'}
-});
-
-// Render the layout before loading the current route's module
-router.on('statechange', function() {
-  layoutView.render.call(layoutView);
-});
-
-// Called when the route's module finishes loading
-router.on('routeload', function(module, routeArguments) {
-  // Attach the child view to the layoutView's main-content section
-  layoutView.$('#content').replaceWith(new module(routeArguments).render().el);
-});
-
-// Set up event handlers and fire the initial 'statechange' event
-router.init({
-  // Don't add the default 'statechange' event handler to call loadCurrentRoute() since
-  // we're manually calling it from layoutView.render()
-  loadCurrentRouteOnStateChange: false
-});
+  // Load the router and your layout
+  require(['router', 'js/layout/layoutView'], function(router, LayoutView) {
+    var layoutView = new LayoutView();
+    // The layout's render method should draw the header, footer, and an empty main-content section then
+    // load the content section.
+    // render: function() {
+    //   this.$el.html(this.template({model: this.model}));
+    //   router.loadCurrentRoute();
+    // }
+    
+    // Configure the router
+    router
+      .registerRoutes({
+        home: {path: '/', moduleId: 'home/homeView'},
+        order: {path: '/order', moduleId: 'order/orderView'},
+        notFound: {path: '*', moduleId: 'notFound/notFoundView'}
+      })
+      .on('statechange', function() {
+        // Render the layout before loading the current route's module
+        layoutView.render.call(layoutView);
+      })
+      .on('routeload', function(module, routeArguments) {
+        // Attach the content view to the layoutView's main-content section
+        layoutView.$('#main-content').replaceWith(new module(routeArguments).render().el);
+      })
+      .init({
+        // We're manually calling loadCurrentRoute() from layoutView.render()
+        loadCurrentRouteOnStateChange: false
+      });
+  );
+);
 ```
 
 The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach completely decouples the rendering from the routing.
