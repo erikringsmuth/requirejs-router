@@ -9,7 +9,8 @@
   // Relaxing options
   "globals": {
     "define": true,
-    "require": true
+    "require": true,
+    "console": true
   },
   "globalstrict": true,
   "loopfunc": true,
