@@ -7,8 +7,6 @@ define(function(require) {
   return Ractive.extend({
     template: layoutTemplate,
 
-    contentPlaceholder: '#content-placeholder',
-
     data: {
       routes: router.routes
     },
