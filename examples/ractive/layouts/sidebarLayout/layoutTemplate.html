@@ -1,0 +1,26 @@
+<header class="navbar navbar-default">
+  <div class="container">
+    <nav>
+      <a href="#/" class="navbar-brand">RequireJS Router - Ractive</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="row">
+
+    <div class="col-xs-9">
+      <div id="content-placeholder"></div>
+    </div>
+
+    <div class="col-xs-3">
+      <ul class="nav nav-sidebar">
+        <li class="{{routes.demo.active ? 'active' : ''}}"><a href="#/demo/123?queryParam1=Routing%20with%20Ractive!">Demo</a></li>
+        <li class="{{routes.sidebar1.active ? 'active' : ''}}"><a href="#/sidebar1">Sidebar 1</a></li>
+        <li class="{{routes.sidebar2.active ? 'active' : ''}}"><a href="#/sidebar2">Sidebar 2</a></li>
+        <li><a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/ractive">View Source <i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </div>
+
+  </div>
+</main>

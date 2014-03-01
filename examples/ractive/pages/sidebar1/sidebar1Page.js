@@ -1,8 +1,8 @@
 define(function(require) {
   'use strict';
   var Ractive = require('ractive'),
-      notFoundTemplate = require('text!./notFoundTemplate.html'),
-      Layout = require('js/searchLayout/layout');
+      sidebar1Template = require('text!./sidebar1Template.html'),
+      Layout = require('layouts/sidebarLayout/layout');
 
   return {
     createView: function(selector, routeArguments) {
@@ -11,11 +11,11 @@ define(function(require) {
       });
 
       var Home = Ractive.extend({
-        template: notFoundTemplate,
+        template: sidebar1Template,
 
         init: function() {
           this.on('teardown', function() {
-            console.log('teardown notFoundPage');
+            console.log('teardown sidebar1Page');
           });
         }
       });

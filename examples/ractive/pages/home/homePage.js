@@ -2,12 +2,20 @@ define(function(require) {
   'use strict';
   var Ractive = require('ractive'),
       homeTemplate = require('text!./homeTemplate.html'),
-      Layout = require('js/searchLayout/layout');
+      Layout = require('layouts/basicLayout/layout');
 
   return {
     createView: function(selector, routeArguments) {
+      var home;
+
       var layout = new Layout({
-        el: selector
+        el: selector,
+
+        init: function() {
+          this.on('teardown', function() {
+            home.teardown();
+          });
+        }
       });
 
       var Home = Ractive.extend({
@@ -20,7 +28,7 @@ define(function(require) {
         }
       });
 
-      new Home({
+      home = new Home({
         el: layout.contentPlaceholder
       });
     }

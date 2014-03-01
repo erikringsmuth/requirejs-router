@@ -1,8 +1,8 @@
 define(function(require) {
   'use strict';
   var Ractive = require('ractive'),
-      demoTemplate = require('text!./demoTemplate.html'),
-      Layout = require('js/searchLayout/layout');
+      sidebar2Template = require('text!./sidebar2Template.html'),
+      Layout = require('layouts/sidebarLayout/layout');
 
   return {
     createView: function(selector, routeArguments) {
@@ -11,15 +11,11 @@ define(function(require) {
       });
 
       var Home = Ractive.extend({
-        template: demoTemplate,
-
-        data: {
-          routeArguments: routeArguments
-        },
+        template: sidebar2Template,
 
         init: function() {
           this.on('teardown', function() {
-            console.log('teardown demoPage');
+            console.log('teardown sidebar2Page');
           });
         }
       });

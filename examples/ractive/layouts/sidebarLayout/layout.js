@@ -17,13 +17,6 @@ define(function(require) {
       this.on('teardown', function() {
         console.log('teardown simpleLayout');
       });
-
-      this.on('search', function(event) {
-        if (event.original.keyCode === 13) {
-          event.original.target.value = '';
-          event.original.preventDefault();
-        }
-      });
     }
   });
 });

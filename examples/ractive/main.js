@@ -20,16 +20,11 @@ define([], function() {
     router
       .registerRoutes({
          // matches '/', '/examples/ractive/' (both localhost), or '/requirejs-router/examples/ractive/' (gh-pages server)
-        home: { path: /^\/(requirejs-router\/)?(examples\/ractive\/)?$/i, moduleId: 'js/home/homePage' },
-
-        // matches using a path variable
-        demo: { path: '/demo/:pathArg1', moduleId: 'js/demo/demoPage' },
-
-        // Info about the library or framework
-        about: { path: '/about', moduleId: 'js/about/aboutPage' },
-
-        // All other routes
-        notFound: { path: '*', moduleId: 'js/notFound/notFoundPage' }
+        home: { path: /^\/(requirejs-router\/)?(examples\/ractive\/)?$/i, moduleId: 'pages/home/homePage' },
+        demo: { path: '/demo/:pathArg1', moduleId: 'pages/demo/demoPage' },
+        sidebar1: { path: '/sidebar1', moduleId: 'pages/sidebar1/sidebar1Page' },
+        sidebar2: { path: '/sidebar2', moduleId: 'pages/sidebar2/sidebar2Page' },
+        notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
       .on('routeload', function onRouteLoad(module, routeArguments) {
         // When a route loads, render the view and attach it to the document
