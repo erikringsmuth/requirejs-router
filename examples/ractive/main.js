@@ -8,7 +8,10 @@ define([], function() {
       'rv': 'bower_components/requirejs-ractive/rv',
       'router': 'bower_components/requirejs-router/router',
       'amd-loader': 'bower_components/requirejs-ractive/amd-loader',
-      'ractive': 'bower_components/ractive/Ractive'
+      'ractive': 'bower_components/ractive/Ractive',
+      'jquery': 'bower_components/jquery/dist/jquery.min',
+      'prettify': 'bower_components/google-code-prettify/src/prettify',
+      'utilities': '../common/utilities'
     }
   });
 

@@ -15,7 +15,7 @@ define(function(require) {
 
     init: function() {
       this.on('teardown', function() {
-        console.log('teardown simpleLayout');
+        console.log('teardown sidebarLayout');
       });
     }
   });
