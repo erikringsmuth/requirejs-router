@@ -10,7 +10,7 @@ define(function(require) {
         el: selector
       });
 
-      var Home = Ractive.extend({
+      var DemoPage = Ractive.extend({
         template: demoTemplate,
 
         data: {
@@ -19,12 +19,13 @@ define(function(require) {
 
         init: function() {
           this.on('teardown', function() {
+            layout.teardown();
             console.log('teardown demoPage');
           });
         }
       });
 
-      new Home({
+      return new DemoPage({
         el: layout.contentPlaceholder
       });
     }

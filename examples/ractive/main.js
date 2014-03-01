@@ -8,10 +8,7 @@ define([], function() {
       'rv': 'bower_components/requirejs-ractive/rv',
       'router': 'bower_components/requirejs-router/router',
       'amd-loader': 'bower_components/requirejs-ractive/amd-loader',
-      'ractive': 'bower_components/ractive/Ractive',
-      'jquery': 'bower_components/jquery/dist/jquery.min',
-      'prettify': 'bower_components/google-code-prettify/src/prettify',
-      'utilities': '../common/utilities'
+      'ractive': 'bower_components/ractive/Ractive'
     }
   });
 
@@ -32,7 +29,7 @@ define([], function() {
       .on('routeload', function onRouteLoad(module, routeArguments) {
         // When a route loads, render the view and attach it to the document
         var render = function() {
-          module.createView('body', routeArguments);
+          currentView = module.createView('body', routeArguments);
           scroll(0, 0);
         };
 

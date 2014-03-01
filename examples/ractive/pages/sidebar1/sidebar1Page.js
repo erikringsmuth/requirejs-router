@@ -10,17 +10,18 @@ define(function(require) {
         el: selector
       });
 
-      var Home = Ractive.extend({
+      var Sidebar1Page = Ractive.extend({
         template: sidebar1Template,
 
         init: function() {
           this.on('teardown', function() {
+            layout.teardown();
             console.log('teardown sidebar1Page');
           });
         }
       });
 
-      new Home({
+      return new Sidebar1Page({
         el: layout.contentPlaceholder
       });
     }
