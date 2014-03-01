@@ -1,0 +1,21 @@
+<header class="navbar navbar-default">
+  <div class="container">
+    <nav>
+      <a href="#/" class="navbar-brand">RequireJS Router - Ractive</a>
+      <form class="navbar-form navbar-left">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" on-keydown="search">
+        </div>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="{{routes.about.active ? 'active' : ''}}"><a href="#/about">About</a></li>
+        <li class="{{routes.demo.active ? 'active' : ''}}"><a href="#/demo/123?queryParam1=Ractive%20Rocks!">Demo</a></li>
+        <li><a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages">View On GitHub <i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div id="content-placeholder"></div>
+</main>
