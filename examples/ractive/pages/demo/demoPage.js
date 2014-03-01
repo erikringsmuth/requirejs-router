@@ -2,32 +2,22 @@ define(function(require) {
   'use strict';
   var Ractive = require('ractive'),
       demoTemplate = require('text!./demoTemplate.html'),
-      Layout = require('layouts/basicLayout/layout');
+      Layout = require('layouts/basicLayout/layout'),
+      router = require('router');
 
-  return {
-    createView: function(selector, routeArguments) {
-      var layout = new Layout({
-        el: selector
-      });
+  var DemoPage = Ractive.extend({
+    template: demoTemplate,
 
-      var DemoPage = Ractive.extend({
-        template: demoTemplate,
+    init: function() {
+      this.set('routeArguments', router.routeArguments());
 
-        data: {
-          routeArguments: routeArguments
-        },
-
-        init: function() {
-          this.on('teardown', function() {
-            layout.teardown();
-            console.log('teardown demoPage');
-          });
-        }
-      });
-
-      return new DemoPage({
-        el: layout.contentPlaceholder
+      this.on('teardown', function() {
+        console.log('teardown demoPage');
       });
     }
-  };
+  });
+
+  return Layout.extend({
+    components: { 'content-placeholder': DemoPage }
+  });
 });

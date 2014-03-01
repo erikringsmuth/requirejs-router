@@ -15,7 +15,8 @@ define([], function() {
   // Load the router
   require(['router'], function(router) {
 
-    var currentView;
+    // Keep track of the currently loaded view so we can run teardown before loading the new view
+    var view;
 
     router
       .registerRoutes({
@@ -26,15 +27,15 @@ define([], function() {
         sidebar2: { path: '/sidebar2', moduleId: 'pages/sidebar2/sidebar2Page' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
-      .on('routeload', function onRouteLoad(module, routeArguments) {
+      .on('routeload', function onRouteLoad(View) {
         // When a route loads, render the view and attach it to the document
         var render = function() {
-          currentView = module.createView('body', routeArguments);
+          view = new View({ el: 'body' });
           scroll(0, 0);
         };
 
-        if (currentView) {
-          currentView.teardown(render);
+        if (view) {
+          view.teardown(render);
         } else {
           render();
         }

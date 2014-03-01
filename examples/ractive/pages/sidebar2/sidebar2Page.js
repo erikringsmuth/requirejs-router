@@ -4,26 +4,17 @@ define(function(require) {
       sidebar2Template = require('text!./sidebar2Template.html'),
       Layout = require('layouts/sidebarLayout/layout');
 
-  return {
-    createView: function(selector, routeArguments) {
-      var layout = new Layout({
-        el: selector
-      });
+  var Sidebar2Page = Ractive.extend({
+    template: sidebar2Template,
 
-      var Sidebar2Page = Ractive.extend({
-        template: sidebar2Template,
-
-        init: function() {
-          this.on('teardown', function() {
-            layout.teardown();
-            console.log('teardown sidebar2Page');
-          });
-        }
-      });
-
-      return new Sidebar2Page({
-        el: layout.contentPlaceholder
+    init: function() {
+      this.on('teardown', function() {
+        console.log('teardown sidebar2Page');
       });
     }
-  };
+  });
+
+  return Layout.extend({
+    components: { 'content-placeholder': Sidebar2Page }
+  });
 });

@@ -4,26 +4,17 @@ define(function(require) {
       notFoundTemplate = require('text!./notFoundTemplate.html'),
       Layout = require('layouts/basicLayout/layout');
 
-  return {
-    createView: function(selector, routeArguments) {
-      var layout = new Layout({
-        el: selector
-      });
+  var NotFoundPage = Ractive.extend({
+    template: notFoundTemplate,
 
-      var NotFoundPage = Ractive.extend({
-        template: notFoundTemplate,
-
-        init: function() {
-          this.on('teardown', function() {
-            layout.teardown();
-            console.log('teardown notFoundPage');
-          });
-        }
-      });
-
-      return new NotFoundPage({
-        el: layout.contentPlaceholder
+    init: function() {
+      this.on('teardown', function() {
+        console.log('teardown notFoundPage');
       });
     }
-  };
+  });
+  
+  return Layout.extend({
+    components: { 'content-placeholder': NotFoundPage }
+  });
 });
