@@ -5,7 +5,7 @@ define(function(require) {
       demoTemplate = require('text!./demoTemplate.html'),
       Layout = require('layouts/basicLayout/layout');
 
-  return Nex.defineComponent('home-page', {
+  return Nex.defineComponent('demo-page', {
     template: Handlebars.compile(demoTemplate),
     layout: Layout,
     ready: function(routeArguments) {

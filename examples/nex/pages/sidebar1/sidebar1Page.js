@@ -5,7 +5,7 @@ define(function(require) {
       sidebar1Template = require('text!./sidebar1Template.html'),
       Layout = require('layouts/sidebarLayout/layout');
 
-  return Nex.defineComponent('home-page', {
+  return Nex.defineComponent('sidebar1-page', {
     template: Handlebars.compile(sidebar1Template),
     layout: Layout
   });
