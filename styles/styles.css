@@ -25,6 +25,9 @@ footer ul a, footer .text-muted {
   color: #777;
 }
 
+.navbar {
+  margin-bottom: -10px;
+}
 .navbar,
 .navbar-default .navbar-brand,
 .navbar-default .navbar-brand:hover,
@@ -78,4 +81,9 @@ pre code {
 /* Adds spacing on top of anything */
 .spacer {
   margin-top: 2em;
+}
+
+/* spacing */
+h1, h2, h3 {
+  margin-top: 1.4em;
 }

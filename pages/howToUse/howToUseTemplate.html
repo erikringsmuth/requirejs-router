@@ -1,0 +1,177 @@
+<div class="row">
+  <div class="col-xs-12">
+    <h2>RequireJS Router</h2>
+
+    <p class="lead">A scalable, lazy loading, AMD router.</p>
+
+    <p>The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.</p>
+
+    <p>The router works with <code>hashchange</code> and HTML5 <code>pushState</code>. One set of routes will match regular paths <code>/</code>, hash paths <code>#/</code>, and hashbang paths <code>#!/</code>.</p>
+
+    <h2>Configuration</h2>
+
+    <p>Here's an example <code>main.js</code> using the RequireJS Router to run the app.</p>
+
+    <pre>define([], function() {
+  'use strict';
+
+  // Configure require.js paths and shims
+  require.config({
+    paths: {
+      'text': 'bower_components/requirejs-text/text',
+      'router': 'bower_components/requirejs-router/router'
+    }
+  });
+
+  // Load the router
+  require(['router'], function(router) {
+    router
+      .registerRoutes({
+        // matches an exact path
+        home: { path: '/home', moduleId: 'home/homeView' },
+
+        // matches using a wildcard
+        customer: { path: '/customer/*', moduleId: 'customer/customerView' },
+
+        // matches using a path variable
+        order: { path: '/orders/:id', moduleId: 'order/orderView' },
+
+        // matches a pattern like '/word/number'
+        regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
+
+        // matches everything else
+        notFound: { path: '*', moduleId: 'notFound/notFoundView' }
+      })
+      .on('routeload', function(module, routeArguments) {
+        // When a route loads, render the view and attach it to the document
+        var body = document.querySelector('body');
+        body.innerHTML = '';
+        body.appendChild(new module(routeArguments).outerEl);
+      })
+      .init(); // Set up event handlers and trigger the initial page load
+  });
+});</pre>
+
+    <p>There is only one instance of the router. Loading the router in multiple AMD modules will reference the same router. This lets you listen to and fire <code>statechange</code> and <code>routeload</code> events using <code>router.on()</code> and <code>router.fire()</code>.</p>
+
+
+    <h2>How to use</h2>
+
+    <p>There are two ways JavaScript frameworks handle routing and rendering views. The most common way is to have <code>main.js</code> start the app which renders the layout (header, footer, etc.). Once the layout is rendered the router loads the content view and attaches it to the layout. This is the top-down approach.</p>
+
+    <p>Alternatively you can have <code>main.js</code> directly load the content view and have the content view inject the layout. This is the IoC approach. The layout is completely decoupled from the router. This is the simplest and most dynamic approach.</p>
+
+    <h3>IoC approach</h3>
+
+    <p>Example framework: <a href="http://erikringsmuth.github.io/nex-js/">nex-js</a></p>
+
+    <p>Here's an example ineraction:</p>
+
+    <ol>
+    <li>The user clicks a link in the header <code>&lt;li&gt;&lt;a href="#/order"&gt;Orders&lt;/a&gt;&lt;/li&gt;</code>
+    </li>
+    <li>A <code>statechange</code> event is fired and the router loads the <code>'order/orderView'</code> module</li>
+    <li>The router calls <code>on('routeload', function(module, routeArguments) {})</code> with <code>OrderView</code> passed as the module</li>
+    <li>Your <code>routeload</code> event handler renders the <code>OrderView</code>, injects it's <code>layoutView</code>, and attaches it to the document</li>
+    </ol><p>You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new <code>OrderView</code>.</p>
+
+    <p>Look at the <code>main.js</code> configuration at the top of this document for an example setup.</p>
+
+    <h3>Top-down approach</h3>
+
+    <p>Example framework: <a href="http://backbonejs.org/">Backbone.js</a></p>
+
+    <p>Here's an example ineraction:</p>
+
+    <ol>
+    <li>The user clicks a link in the header <code>&lt;li&gt;&lt;a href="#/order"&gt;Orders&lt;/a&gt;&lt;/li&gt;</code>
+    </li>
+    <li>A <code>statechange</code> event is fired and your custom <code>on('statechange', eventHandler)</code> calls <code>layoutView.render()</code> which draws your header, footer, and an empty main-content section</li>
+    <li>
+    <code>layoutView.render()</code> calls <code>router.loadCurrentRoute()</code> which loads the <code>'order/orderView'</code> module</li>
+    <li>The router calls <code>on('routeload', function(module, routeArguments) {})</code> with <code>OrderView</code> passed as the module</li>
+    <li>Your <code>routeload</code> event handler renders the <code>OrderView</code> and attaches it to the <code>layoutView</code>'s main-content section</li>
+    </ol><p>You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new <code>OrderView</code>.</p>
+
+    <p>Here's an example <code>main.js</code> using the router and a layout view with the top-down approach.</p>
+
+    <pre>define([], function() {
+  'use strict';
+
+  // Configure require.js paths and shims
+  require.config({
+    paths: {
+      'text': 'bower_components/requirejs-text/text',
+      'router': 'bower_components/requirejs-router/router'
+    }
+  });
+
+  // Load the router and your layout
+  require(['router', 'js/layout/layoutView'], function(router, LayoutView) {
+    var layoutView = new LayoutView();
+    // The layout's render method should draw the header, footer, and an empty main-content section
+    // then load the content section.
+    // render: function() {
+    //   this.$el.html(this.template({model: this.model}));
+    //   router.loadCurrentRoute();
+    // }
+
+    // Configure the router
+    router
+      .registerRoutes({
+        home: {path: '/', moduleId: 'home/homeView'},
+        order: {path: '/order', moduleId: 'order/orderView'},
+        notFound: {path: '*', moduleId: 'notFound/notFoundView'}
+      })
+      .on('statechange', function() {
+        // Render the layout before loading the current route's module
+        layoutView.render.call(layoutView);
+      })
+      .on('routeload', function(module, routeArguments) {
+        // Attach the content view to the layoutView's main-content section
+        layoutView.$('#main-content').replaceWith(new module(routeArguments).render().el);
+      })
+      .init({
+        // We're manually calling loadCurrentRoute() from layoutView.render()
+        loadCurrentRouteOnStateChange: false
+      });
+  );
+);</pre>
+
+    <p>The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach completely decouples the rendering from the routing.</p>
+
+    <h2>Demo Site</h2>
+
+    <p>The RequireJS Router was written alongside <a href="http://erikringsmuth.github.io/nex-js/">nex-js</a>. The site's source is available in the <a href="https://github.com/erikringsmuth/nex-js/tree/gh-pages">gh-pages branch of nex-js</a>. The router is configured in <a href="https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js">/js/main.js</a>. Both nex-js and the RequireJS Router are licensed under MIT.</p>
+
+    <h2>Navigation</h2>
+
+    <p>The RequireJS router does not re-implement the existing navigation capabilities of browsers. There are three ways to trigger a page load. <code>hashchange</code>, <code>popstate</code>, or a page load.</p>
+
+    <p>If you are using <code>hashchange</code> you don't need to do anything. Clicking a link <code>&lt;a href="#/new/page"&gt;New Page&lt;/a&gt;</code> will fire a <code>hashchange</code> event and tell the router to load the new route. You don't need to do anything with this event in your Javascript.</p>
+
+    <p>If you are using HTML5 <code>pushState</code> you need one extra step. The <code>pushState()</code> method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use <code>pushState()</code> to navigate to another route you need to call it like this.</p>
+
+    <pre>history.pushState(stateObj, title, url); // push a new URL into the history stack
+history.go(0); // go to the current state in the history stack, this fires a popstate event</pre>
+
+    <p>You can also do a normal page load which will call <code>router.loadCurrentRoute()</code> in <code>main.js</code>.</p>
+
+    <h2>Install</h2>
+
+    <p><a href="https://github.com/erikringsmuth/requirejs-router/archive/master.zip">Download</a> or run <code>bower install requirejs-router</code> in node.</p>
+
+    <h2>Build <a href="https://travis-ci.org/erikringsmuth/requirejs-router"><img src="https://github-camo.global.ssl.fastly.net/ab3d5adedae21dc7101032e7eeca6f8c9e4450da/68747470733a2f2f7472617669732d63692e6f72672f6572696b72696e67736d7574682f726571756972656a732d726f757465722e706e673f6272616e63683d6d6173746572" alt="Build Status" data-canonical-src="https://travis-ci.org/erikringsmuth/requirejs-router.png?branch=master" style="max-width:100%;"></h2>
+
+    <ul>
+    <li>In node.js</li>
+    <li>Run <code>npm install</code> to install dependencies</li>
+    <li>Run <code>gulp</code> to lint and minify your code. This will also watch for changes.</li>
+    </ul>
+
+    <h2>Running Tests</h2>
+
+    <p>Open <code>/tests/AmdSpecRunner.html</code> and make sure all tests pass. The tests are written using Jasmine.</p>
+
+  </div>
+</div>

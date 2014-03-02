@@ -4,7 +4,6 @@ define([], function() {
   // Configure require.js paths and shims
   require.config({
     paths: {
-      'text': 'bower_components/requirejs-text/text',
       'rv': 'bower_components/requirejs-ractive/rv',
       'router': 'bower_components/requirejs-router/router',
       'amd-loader': 'bower_components/requirejs-ractive/amd-loader',

@@ -10,7 +10,7 @@
 
     <h2>Configuration</h2>
 
-    <p>Here's an example main.js using the RequireJS Router to run the app.</p>
+    <p>Here's an example <code>main.js</code> using the RequireJS Router to run the app.</p>
 
     <pre>define([], function() {
   'use strict';
@@ -54,244 +54,18 @@
 
     <p>There is only one instance of the router. Loading the router in multiple AMD modules will reference the same router. This lets you listen to and fire <code>statechange</code> and <code>routeload</code> events using <code>router.on()</code> and <code>router.fire()</code>.</p>
 
-    <h2>Router Properties</h2>
-
-    <ul>
-      <li><code>router.routes</code> - All registered routes</li>
-      <li><code>router.registerRoutes(routes)</code> - Register your routes</li>
-      <li><code>router.init([options])</code> - Set up event handlers and trigger the initial page load</li>
-      <li><code>router.on('routeload', routeLoadedCallback)</code> - Called when the route's AMD module finishes loading</li>
-      <li><code>router.routeArguments([route, [url]])</code> - Returns an object with the path variables and query parameter values from the URL</li>
-      <li><code>router.urlPath(url)</code> - Returns the hash path if it exists otherwise returns the normal path</li>
-      <li><code>router.activeRoute</code> - A reference to the active route {path: '/home', moduleId: 'home/homeView'}</li>
-      <li><code>router.loadCurrentRoute()</code> - Manually tell the router to load the module for the current route</li>
-      <li><code>router.testRoute(route, [url])</code> - Test if the route matches the current URL</li>
-      <li><code>router.on('statechange', onStateChangeCallback)</code> - Called when a hashchange or popstate event is fired</li>
-      <li><code>router.fire(eventName, [arg1, [arg2]])</code> - Manually fire an event</li>
-      <li><code>router.off(eventName, eventHandler)</code> - Remove an event handler</li>
-    </ul>
-
-    <h3>routes</h3>
-
-    <p>A route has 3 properties</p>
-    <ul>
-      <li><code>path</code> (string or regex) - The URL path</li>
-      <li><code>moduleId</code> (string) - The AMD module ID</li>
-      <li><code>active</code> (boolean) - indicates if it's the active route</li>
-    </ul>
-    <p>A simple route object would look like this <code>{path: '/home', moduleId: 'home/homeView'}</code>. When you navigate to <code>/home</code> it will load the <code>home/homeView</code> module.</p>
-
-    <h3>route.path</h3>
-
-    <ul>
-      <li>The simplest path is an exact match like <code>/home</code>.</li>
-      <li>You can use wildcards to match a segment of a path. For example <code>/customer/*/name</code> will match <code>/customer/123/name</code>.</li>
-      <li>You can use path variables to match a segment of a path. For example <code>/customer/:id/name</code> will match <code>/customer/123/name</code>. This will set <code>routeArguments.id = 123</code> in the <code>onRouteLoad(module, routeArguments)</code>.</li>
-      <li>You can use a regular expression to do awesome pattern matching. For example <code>/^\/\w+\/\d+$/i</code> will match a pattern like <code>/word/number</code>.</li>
-      <li>The catch-all path <code>'*'</code> will match everything. This is generally used to load a "Not Found" view.</li>
-    </ul>
-
-    <h3>route.moduleId</h3>
-
-    <p>This is the AMD module ID. This is the ID you would use in a <code>require</code> or <code>define</code> statement like <code>require(['moduleId'], function(module) {})</code>.</p>
-
-    <h3>route.active</h3>
-
-    <p>Indicates if it's the active route. <code>true</code> if it's the active route, <code>false</code> or <code>undefined</code> otherwise. This is set by the router.</p>
-
-    <h2>registerRoutes(routes)</h2>
-
-    <p>Registers routes. You can call this multiple times to add additional routes.</p>
-
-    <pre>router.registerRoutes({
-  home: { path: '/home', moduleId: 'home/homeView' },
-  notFound: { path: '*', moduleId: 'notFound/notFoundView' }
-});</pre>
-
-    <h2>init([options])</h2>
-
-    <p>Adds <code>hashchange</code> and <code>popstate</code> event listeners to the window. These are consolidated into a <code>statechange</code> event that is used by the router. <code>init()</code> then sets up a default <code>statechange</code> event handler to call <code>loadCurrentRoute()</code>. Finally it fires a <code>statechange</code> to load the current route. You can set these options to prevent some of the default behavior.</p>
-
-    <pre>router.init({
-  // If this is false init() won't add a statechange event handler to call loadCurrentRoute()
-  loadCurrentRouteOnStateChange: false,
-
-  // If this is false init() won't fire a statechange event to load the current route
-  fireInitialStateChange: false
-});</pre>
-
-    <h2>on('routeload', routeLoadedCallback)</h2>
-
-    <p>Called when the route's AMD module finishes loading. Use this to render the view and attach it to the document. The module and route arguments will be passed as arguments. A simple <code>routeload</code> function like this will do everything you need.</p>
-
-    <pre>router.on('routeload', function(module, routeArguments) {
-  var body = document.querySelector('body');
-  body.innerHTML = '';
-  body.appendChild(new module(routeArguments).outerEl);
-});</pre>
-
-    <h2>routeArguments([route, [url]])</h2>
-
-    <p>You can call <code>routeArguments()</code> without any parameters to get the route arguments for the current route.</p>
-
-    <p>Route arguments contain path variables and query parameters. For example:</p>
-
-    <pre>// This route and URL
-var route = { path: '/customer/:id' };
-var url = 'http://domain.com/customer/123?orderBy=descending&filter=true';
-
-var routeArguments = router.routeArguments(route, url);</pre>
-
-    <p>Will result in these <code>routeArguments</code></p>
-
-    <pre>{
-  id: 123,
-  orderBy: 'descending',
-  filter: true
-}</pre>
-
-    <p>The route arguments are parsed into their boolean, numeric, or decoded string formats.</p>
-
-    <h2>urlPath(url)</h2>
-
-    <p>Routes are first compared against the hash path (a hash starting in <code>#/</code> or <code>#!/</code>) and fall back to the regular path if no hash path exists. This allows one set of routes to work with both hashchange and HTML5 pushState. When a hashchange, popstate, or page load occures the router will find the first matching route and load that module.</p>
-
-    <p>For example, these URLs all have this path <code>/example/path</code>.</p>
-
-    <ul>
-      <li><code>http://domain.com/example/path?queryParam=true</code></li>
-      <li><code>http://domain.com/#/example/path?queryParam=true</code></li>
-      <li><code>http://domain.com/#!/example/path?queryParam=true</code></li>
-      <li><code>http://domain.com/other/path?queryParam2=false#/example/path?queryParam=true</code></li>
-    </ul>
-
-    <p>The 4th URL example ignores the normal path and query parameters since it has a hash path.</p>
-
-    <h2>activeRoute</h2>
-
-    <p>A reference to the active route. Example: <code>{path: '/home', moduleId: 'home/homeView'}</code></p>
-
-    <h2>loadCurrentRoute()</h2>
-
-    <p>Tells the router to load the module for the current route. This is called by the default <code>on('statechange', onStateChangeHandler)</code> any time a hashchange or popstate event is fired.</p>
-
-    <h2>testRoute(route, [url])</h2>
-
-    <p>Compares the route against the current URL. Returns <code>true</code> if it matches, <code>false</code> otherwise.</p>
-
-    <h2>on('statechange', onStateChangeHandler)</h2>
-
-    <p>Called when a hashchange or popstate event is fired. <code>init()</code> sets up a default <code>statechange</code> event handler that calls <code>loadCurrentRoute()</code>. You can pass an option to <code>init()</code> to override this if you need to write your own <code>statechange</code> handler to do custom logic before <code>loadCurrentRoute()</code> is called.</p>
-
-    <h2>fire(eventName, [arg1, [arg2]])</h2>
-
-    <p>Manually fire an event. The router fires <code>statechange</code> and <code>routeload</code> events. <code>statechange</code> is called when the browser fires a <code>hashchange</code> or <code>popstate</code>. <code>routeload</code> is called when the router finishes loading a module for a route. Use <code>routeload</code> to render your view.</p>
-
-    <h2>off(eventName, eventHandler)</h2>
-
-    <p>Remove an event handler. If you want remove an event handler you need to keep a reference to it so you can tell router.off() with the original event handler.</p>
-
-    <h2>How to use</h2>
-
-    <p>There are two ways JavaScript frameworks handle routing and rendering views. The most common way is to have <code>main.js</code> start the app which renders the layout (header, footer, etc.). Once the layout is rendered the router loads the content view and attaches it to the layout. This is the top-down approach.</p>
-
-    <p>Alternatively you can have <code>main.js</code> directly load the content view and have the content view inject the layout. This is the IoC approach. The layout is completely decoupled from the router. This is the simplest and most dynamic approach.</p>
-
-    <h3>IoC approach</h3>
-
-    <p>Example framework: <a href="http://erikringsmuth.github.io/nex-js/">nex-js</a></p>
-
-    <p>Here's an example ineraction:</p>
-
-    <ol>
-    <li>The user clicks a link in the header <code>&lt;li&gt;&lt;a href="#/order"&gt;Orders&lt;/a&gt;&lt;/li&gt;</code>
-    </li>
-    <li>A <code>statechange</code> event is fired and the router loads the <code>'order/orderView'</code> module</li>
-    <li>The router calls <code>on('routeload', function(module, routeArguments) {})</code> with <code>OrderView</code> passed as the module</li>
-    <li>Your <code>routeload</code> event handler renders the <code>OrderView</code>, injects it's <code>layoutView</code>, and attaches it to the document</li>
-    </ol><p>You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new <code>OrderView</code>.</p>
-
-    <p>Look at the <code>main.js</code> configuration at the top of this document for an example setup.</p>
-
-    <h3>Top-down approach</h3>
-
-    <p>Example framework: <a href="http://backbonejs.org/">Backbone.js</a></p>
-
-    <p>Here's an example ineraction:</p>
-
-    <ol>
-    <li>The user clicks a link in the header <code>&lt;li&gt;&lt;a href="#/order"&gt;Orders&lt;/a&gt;&lt;/li&gt;</code>
-    </li>
-    <li>A <code>statechange</code> event is fired and your custom <code>on('statechange', eventHandler)</code> calls <code>layoutView.render()</code> which draws your header, footer, and an empty main-content section</li>
-    <li>
-    <code>layoutView.render()</code> calls <code>router.loadCurrentRoute()</code> which loads the <code>'order/orderView'</code> module</li>
-    <li>The router calls <code>on('routeload', function(module, routeArguments) {})</code> with <code>OrderView</code> passed as the module</li>
-    <li>Your <code>routeload</code> event handler renders the <code>OrderView</code> and attaches it to the <code>layoutView</code>'s main-content section</li>
-    </ol><p>You're done. The layout is re-rendered with the "Orders" link marked as active and the content section populated with a new <code>OrderView</code>.</p>
-
-    <p>Here's an example <code>main.js</code> using the router and a layout view with the top-down approach.</p>
-
-    <pre>define([], function() {
-  'use strict';
-
-  // Configure require.js paths and shims
-  require.config({
-    paths: {
-      'text': 'bower_components/requirejs-text/text',
-      'router': 'bower_components/requirejs-router/router'
-    }
-  });
-
-  // Load the router and your layout
-  require(['router', 'js/layout/layoutView'], function(router, LayoutView) {
-    var layoutView = new LayoutView();
-    // The layout's render method should draw the header, footer, and an empty main-content section
-    // then load the content section.
-    // render: function() {
-    //   this.$el.html(this.template({model: this.model}));
-    //   router.loadCurrentRoute();
-    // }
-
-    // Configure the router
-    router
-      .registerRoutes({
-        home: {path: '/', moduleId: 'home/homeView'},
-        order: {path: '/order', moduleId: 'order/orderView'},
-        notFound: {path: '*', moduleId: 'notFound/notFoundView'}
-      })
-      .on('statechange', function() {
-        // Render the layout before loading the current route's module
-        layoutView.render.call(layoutView);
-      })
-      .on('routeload', function(module, routeArguments) {
-        // Attach the content view to the layoutView's main-content section
-        layoutView.$('#main-content').replaceWith(new module(routeArguments).render().el);
-      })
-      .init({
-        // We're manually calling loadCurrentRoute() from layoutView.render()
-        loadCurrentRouteOnStateChange: false
-      });
-  );
-);</pre>
-
-    <p>The top-down approach is more involved than the IoC approach and ties you to one layout view for your site. This works in most cases but the IoC approach completely decouples the rendering from the routing.</p>
-
-    <h2>Demo Site</h2>
-
-    <p>The RequireJS Router was written alongside <a href="http://erikringsmuth.github.io/nex-js/">nex-js</a>. The site's source is available in the <a href="https://github.com/erikringsmuth/nex-js/tree/gh-pages">gh-pages branch of nex-js</a>. The router is configured in <a href="https://github.com/erikringsmuth/nex-js/blob/gh-pages/js/main.js">/js/main.js</a>. Both nex-js and the RequireJS Router are licensed under MIT.</p>
-
     <h2>Navigation</h2>
 
-    <p>The RequireJS router does not re-implement the existing navigation capabilities of browsers. There are three ways to trigger a page load. <code>hashchange</code>, <code>popstate</code>, or a page load.</p>
+    <p>There are three ways to trigger a route change. <code>hashchange</code>, <code>popstate</code>, or a page load.</p>
 
-    <p>If you are using <code>hashchange</code> you don't need to do anything. Clicking a link <code>&lt;a href="#/new/page"&gt;New Page&lt;/a&gt;</code> will fire a <code>hashchange</code> event and tell the router to load the new route. You don't need to do anything with this event in your Javascript.</p>
+    <p>If you're using <code>hashchange</code> you don't need to do anything. Clicking a link <code>&lt;a href="#/new/page"&gt;New Page&lt;/a&gt;</code> will fire a <code>hashchange</code> event and tell the router to load the new route. You don't need to handle the event in your Javascript.</p>
 
-    <p>If you are using HTML5 <code>pushState</code> you need one extra step. The <code>pushState()</code> method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use <code>pushState()</code> to navigate to another route you need to call it like this.</p>
+    <p>If you're using HTML5 <code>pushState</code> you need one extra step. The <code>pushState()</code> method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use <code>pushState()</code> to navigate to another route you need to call it like this.</p>
 
     <pre>history.pushState(stateObj, title, url); // push a new URL into the history stack
 history.go(0); // go to the current state in the history stack, this fires a popstate event</pre>
 
-    <p>You can also do a normal page load which will call <code>router.loadCurrentRoute()</code> in <code>main.js</code>.</p>
+    <p>You can also do a full page load which will call <code>router.loadCurrentRoute()</code> in <code>main.js</code>.</p>
 
     <h2>Install</h2>
 
@@ -300,14 +74,14 @@ history.go(0); // go to the current state in the history stack, this fires a pop
     <h2>Build <a href="https://travis-ci.org/erikringsmuth/requirejs-router"><img src="https://github-camo.global.ssl.fastly.net/ab3d5adedae21dc7101032e7eeca6f8c9e4450da/68747470733a2f2f7472617669732d63692e6f72672f6572696b72696e67736d7574682f726571756972656a732d726f757465722e706e673f6272616e63683d6d6173746572" alt="Build Status" data-canonical-src="https://travis-ci.org/erikringsmuth/requirejs-router.png?branch=master" style="max-width:100%;"></h2>
 
     <ul>
-    <li>In node.js</li>
+    <li>Clone <code>git@github.com:erikringsmuth/requirejs-router.git</code></li>
     <li>Run <code>npm install</code> to install dependencies</li>
     <li>Run <code>gulp</code> to lint and minify your code. This will also watch for changes.</li>
     </ul>
 
     <h2>Running Tests</h2>
 
-    <p>Open <code>/tests/AmdSpecRunner.html</code> and make sure all tests pass. The tests are written using Jasmine.</p>
+    <p>Open <code>/tests/AmdSpecRunner.html</code> and make sure all tests pass.</p>
 
   </div>
 </div>

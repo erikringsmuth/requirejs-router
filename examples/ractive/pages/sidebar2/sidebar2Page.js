@@ -5,13 +5,7 @@ define(function(require) {
       Layout = require('layouts/sidebarLayout/layout');
 
   var Sidebar2Page = Ractive.extend({
-    template: sidebar2Template,
-
-    init: function() {
-      this.on('teardown', function() {
-        console.log('teardown sidebar2Page');
-      });
-    }
+    template: sidebar2Template
   });
 
   return Layout.extend({

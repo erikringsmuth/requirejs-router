@@ -9,12 +9,6 @@ define(function(require) {
 
     data: {
       routes: router.routes
-    },
-
-    init: function() {
-      this.on('teardown', function() {
-        console.log('teardown basicLayout');
-      });
     }
   });
 });

@@ -5,13 +5,7 @@ define(function(require) {
       Layout = require('layouts/basicLayout/layout');
 
   var NotFoundPage = Ractive.extend({
-    template: notFoundTemplate,
-
-    init: function() {
-      this.on('teardown', function() {
-        console.log('teardown notFoundPage');
-      });
-    }
+    template: notFoundTemplate
   });
   
   return Layout.extend({

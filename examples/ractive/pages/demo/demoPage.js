@@ -10,10 +10,6 @@ define(function(require) {
 
     init: function() {
       this.set('routeArguments', router.routeArguments());
-
-      this.on('teardown', function() {
-        console.log('teardown demoPage');
-      });
     }
   });
 
