@@ -33,7 +33,6 @@ define([], function() {
         // When a route loads, render the view and attach it to the document
         var render = function() {
           view = new View({ el: 'body' });
-          scroll(0, 0);
         };
 
         if (view) {
