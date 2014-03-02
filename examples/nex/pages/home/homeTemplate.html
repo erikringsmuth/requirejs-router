@@ -1,32 +1,20 @@
-<p>This site demos routing a Ractive app with 2 different layouts. The home page and demo page use the <code>basicLayout</code>. The Sidebar 1 and Sidebar 2 pages use the <code>sidebarLayout</code>.</p>
+<p>This site demos routing a Nex app with 2 different layouts. The home page and demo page use the <code>basicLayout</code>. The Sidebar 1 and Sidebar 2 pages use the <code>sidebarLayout</code>.</p>
 
-<p>The router doesn't know the layout exists. It simply takes the module/view that was loaded and attaches it to the document. Here's a simplified <code>main.js</code> using the router to load a Ractive view.</p>
+<p>The router doesn't know the layout exists. It simply takes the module/view that was loaded and attaches it to the document. Here's a simplified <code>main.js</code> using the router to load a Nex view.</p>
 
 <pre>define([], function() {
   'use strict';
 
   // Load the router
   require(['router'], function(router) {
-
-    // Keep track of the currently loaded view so we can run teardown before loading the new view
-    var view;
-
     router
       .registerRoutes({
         home: { path: '/', moduleId: 'pages/home/homePage' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
-      .on('routeload', function onRouteLoad(View) {
+      .on('routeload', function onRouteLoad(View, routeArguments) {
         // When a route loads, render the view and attach it to the document
-        var render = function() {
-          view = new View({ el: 'body' });
-        };
-
-        if (view) {
-          view.teardown(render);
-        } else {
-          render();
-        }
+        new View(routeArguments).attachTo('body');
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
@@ -36,19 +24,15 @@
 
 <pre>define(function(require) {
   'use strict';
-  var Ractive = require('ractive'),
-      homeTemplate = require('rv!./homeTemplate'),
+  var Nex = require('nex'),
+      Handlebars = require('handlebars'),
+      homeTemplate = require('text!./homeTemplate.html'),
       Layout = require('layouts/basicLayout/layout');
 
-  // The HomePage
-  var HomePage = Ractive.extend({
-    template: homeTemplate
-  });
-
-  // The object returned by the home page module is a Layout with the HomePage as a component
-  return Layout.extend({
-    components: { 'content-placeholder': HomePage }
+  return Nex.defineComponent('home-page', {
+    template: Handlebars.compile(homeTemplate),
+    layout: Layout
   });
 });</pre>
 
-<p>The full source is in the <a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/ractive">RequireJS Router gh-pages branch</a>.</p>
+<p>This demo's source is in the <a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/nex">RequireJS Router gh-pages branch</a>.</p>

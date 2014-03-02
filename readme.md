@@ -1,3 +1,3 @@
-## RequireJS Router - Ractive Demo
+## RequireJS Router
 
-[RequireJS Router - Ractive gh-pages demo](http://erikringsmuth.github.io/requirejs-router/examples/ractive/)
+[erikringsmuth.github.io/requirejs-router](http://erikringsmuth.github.io/requirejs-router/)
