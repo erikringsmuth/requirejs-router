@@ -14,7 +14,8 @@
       })
       .on('routeload', function onRouteLoad(View, routeArguments) {
         // When a route loads, render the view and attach it to the document
-        new View(routeArguments).attachTo('body');
+        $('body').html('');
+        $('body').append(new View(null, routeArguments).render().el);
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
