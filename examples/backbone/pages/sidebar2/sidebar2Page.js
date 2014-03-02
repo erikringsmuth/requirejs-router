@@ -5,12 +5,16 @@ define(function(require) {
       sidebar2Template = require('text!./sidebar2Template.html'),
       Layout = require('layouts/sidebarLayout/layout');
 
-  return Backbone.View.extend({
+  var Sidebar2Page =  Backbone.View.extend({
     template: _.template(sidebar2Template),
 
     render: function() {
       this.$el.html(this.template(this));
       return this;
     }
+  });
+
+  return Layout.extend({
+    content: Sidebar2Page
   });
 });

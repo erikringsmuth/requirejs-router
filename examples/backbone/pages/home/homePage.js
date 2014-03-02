@@ -6,7 +6,7 @@ define(function(require) {
       Layout = require('layouts/basicLayout/layout'),
       utilities = require('utilities');
 
-  return Backbone.View.extend({
+  var HomePage = Backbone.View.extend({
     template: _.template(homeTemplate),
 
     render: function() {
@@ -14,5 +14,9 @@ define(function(require) {
       utilities.formatCode(this.el);
       return this;
     }
+  });
+
+  return Layout.extend({
+    content: HomePage
   });
 });

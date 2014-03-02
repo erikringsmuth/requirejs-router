@@ -29,12 +29,19 @@
       homeTemplate = require('text!./homeTemplate.html'),
       Layout = require('layouts/basicLayout/layout');
 
-  return Backbone.View.extend({
+  // The HomePage
+  var HomePage = Backbone.View.extend({
     template: _.template(homeTemplate),
+
     render: function() {
       this.$el.html(this.template(this));
       return this;
     }
+  });
+
+  // The object returned by the home page module is a Layout with the HomePage as it's content
+  return Layout.extend({
+    content: HomePage
   });
 });</pre>
 

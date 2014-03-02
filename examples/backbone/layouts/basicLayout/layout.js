@@ -14,6 +14,9 @@ define(function(require) {
 
     render: function() {
       this.$el.html(this.template(this));
+
+      // this.content is populated by the child view
+      this.$el.find('content-placeholder').append(new this.content().render().el);
       return this;
     }
   });

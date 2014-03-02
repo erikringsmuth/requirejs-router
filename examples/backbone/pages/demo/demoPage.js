@@ -3,19 +3,23 @@ define(function(require) {
   var Backbone = require('backbone'),
       _ = require('underscore'),
       demoTemplate = require('text!./demoTemplate.html'),
-      Layout = require('layouts/basicLayout/layout');
+      Layout = require('layouts/basicLayout/layout'),
+      router = require('router');
 
-  return Backbone.View.extend({
+  var DemoPage = Backbone.View.extend({
     template: _.template(demoTemplate),
 
-    initialize: function(options, routeArguments) {
-      this.model.routeArguments = routeArguments;
-    },
+    model: {},
 
     render: function() {
+      this.model.routeArguments = router.routeArguments();
       this.$el.html(this.template(this));
       this.$el.find('#route-arguments').html(JSON.stringify(this.model.routeArguments, null, 2));
       return this;
     }
+  });
+
+  return Layout.extend({
+    content: DemoPage
   });
 });

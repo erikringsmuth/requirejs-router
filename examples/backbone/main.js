@@ -27,7 +27,7 @@ define([], function() {
   });
 
   // Load the router
-  require(['router'], function(router) {
+  require(['router', 'jquery'], function(router, $) {
     router
       .registerRoutes({
          // matches '/', '/examples/backbone/' (both localhost), or '/requirejs-router/examples/backbone/' (gh-pages server)
@@ -39,8 +39,8 @@ define([], function() {
       })
       .on('routeload', function onRouteLoad(View, routeArguments) {
         // When a route loads, render the view and attach it to the document
-        document.querySelector('body').innerHTML = '';
-        document.querySelector('body').appendChild(new View(null, routeArguments).render().el);
+        $('body').html('');
+        $('body').append(new View(null, routeArguments).render().el);
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
