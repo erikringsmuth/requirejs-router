@@ -1,0 +1,17 @@
+<header class="navbar navbar-default">
+  <div class="container">
+    <nav>
+      <a href="#/" class="navbar-brand">RequireJS Router - {nex.js}</a>
+      <ul class="nav navbar-nav navbar-right">
+        <li {{#if model.routes.demo.active}}class="active"{{/if}}><a href="#/demo/123?queryParam1=Routing%20with%20Nex!">Demo</a></li>
+        <li {{#if model.routes.sidebar1.active}}class="active"{{/if}}><a href="#/sidebar1">Sidebar 1</a></li>
+        <li {{#if model.routes.sidebar2.active}}class="active"{{/if}}><a href="#/sidebar2">Sidebar 2</a></li>
+        <li><a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/ractive" target="_blank">View Source <i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <component name="content-placeholder"/>
+</main>

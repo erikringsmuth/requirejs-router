@@ -1,0 +1,38 @@
+{
+  "name": "nex-js",
+  "version": "0.8.0",
+  "homepage": "http://erikringsmuth.github.io/nex-js/",
+  "authors": [
+    "Erik Ringsmuth <erik.ringsmuth@gmail.com>"
+  ],
+  "description": "Unleashing the power of AMD for web applications.",
+  "main": "nex.js",
+  "keywords": [
+    "mv*",
+    "mvc",
+    "views",
+    "RequireJS",
+    "AMD"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "tests",
+    "bower.json",
+    "package.json",
+    "gulpfile.js",
+    "license.md",
+    "readme.md"
+  ],
+  "_release": "0.8.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.8.0",
+    "commit": "d598c56bff5bbd9a25eeff0c10448ee0cfa3fc17"
+  },
+  "_source": "git://github.com/erikringsmuth/nex-js.git",
+  "_target": "~0.8.0",
+  "_originalSource": "nex-js"
+}
