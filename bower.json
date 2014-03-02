@@ -15,7 +15,6 @@
     "jquery": "~1.10.2",
     "respond": "~1.4.2",
     "html5shiv": "~3.7.0",
-    "polyfills": "*",
     "font-awesome": "~4.0.3",
     "google-code-prettify": "~1.0.1"
   }

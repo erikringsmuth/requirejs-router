@@ -9,7 +9,7 @@ define([
     formatCode: function formatCode(element) {
       var elements = element.querySelectorAll('pre');
       for (var el in elements) {
-        if (elements.hasOwnProperty(el)) {
+        if (elements.hasOwnProperty && elements.hasOwnProperty(el)) {
           elements[el].innerHTML = prettify.prettyPrintOne(elements[el].innerHTML);
         }
       }

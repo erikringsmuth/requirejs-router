@@ -8,17 +8,16 @@ define([], function() {
       'rv': 'bower_components/requirejs-ractive/rv',
       'router': 'bower_components/requirejs-router/router',
       'amd-loader': 'bower_components/requirejs-ractive/amd-loader',
-      'Ractive': 'bower_components/ractive/Ractive',
+      'Ractive': 'bower_components/ractive/Ractive-legacy.min',
       'utilities': 'examples/common/utilities',
       'prettify': 'bower_components/google-code-prettify/src/prettify',
       'jquery': 'bower_components/jquery/dist/jquery.min',
-      'bootstrap': 'bower_components/bootstrap/dist/js/bootstrap.min',
-      'polyfill': 'bower_components/polyfills'
+      'bootstrap': 'bower_components/bootstrap/dist/js/bootstrap.min'
     },
     shim: {
       'bootstrap': {
         // bootstrap extends jQuery, it doesn't export anything. It requires html5shiv and respond for IE8.
-        deps: ['jquery', 'bower_components/html5shiv/dist/html5shiv', 'bower_components/respond/src/respond']
+        deps: ['jquery', 'bower_components/html5shiv/dist/html5shiv', 'bower_components/respond/dest/respond.min']
       },
       'html5shiv': {
         exports: 'html5'
@@ -26,8 +25,8 @@ define([], function() {
     }
   });
 
-  // Load the router
-  require(['router', 'bootstrap', 'polyfill/es5'], function(router) {
+  // Load the router and Bootstrap JS
+  require(['router', 'bootstrap'], function(router) {
 
     // Keep track of the currently loaded view so we can run teardown before loading the new view
     var view;
