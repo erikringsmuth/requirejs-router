@@ -25,7 +25,7 @@ define([], function() {
          // matches '/' (localhost) or '/requirejs-router/' (gh-pages server)
         home: { path: /^\/(requirejs-router\/)?$/i, moduleId: 'pages/home/homePage' },
         examples: { path: '/examples', moduleId: 'pages/examples/examplesPage' },
-        demo: { path: '/demo', moduleId: 'pages/demo/demoPage' },
+        demo: { path: '/demo/:pathArg1', moduleId: 'pages/demo/demoPage' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
       .on('routeload', function onRouteLoad(View) {
