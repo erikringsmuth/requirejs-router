@@ -3,8 +3,7 @@ define(function(require) {
   var Nex = require('nex'),
       Handlebars = require('handlebars'),
       notFoundTemplate = require('text!./notFoundTemplate.html'),
-      Layout = require('layouts/basicLayout/layout'),
-      utilities = require('utilities');
+      Layout = require('layouts/basicLayout/layout');
 
   return Nex.defineComponent('not-found-page', {
     template: Handlebars.compile(notFoundTemplate),
@@ -13,7 +12,6 @@ define(function(require) {
 
     render: function() {
       this.html(this.template(this));
-      utilities.formatCode(this);
       return this;
     }
   });

@@ -1,5 +1,5 @@
 {
-  "name": "requirejs-router-ractive",
+  "name": "requirejs-router-nex",
   "version": "0.0.0",
   "dependencies": {
     "requirejs": "~2.1.11",

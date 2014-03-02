@@ -1,0 +1,41 @@
+<p>This site demos routing a Backbone app with 2 different layouts. The home page and demo page use the <code>basicLayout</code>. The Sidebar 1 and Sidebar 2 pages use the <code>sidebarLayout</code>.</p>
+
+<p>The router doesn't know the layout exists. It simply takes the module/view that was loaded and attaches it to the document. Here's a simplified <code>main.js</code> using the router to load a Backbone view.</p>
+
+<pre>define([], function() {
+  'use strict';
+
+  // Load the router
+  require(['router'], function(router) {
+    router
+      .registerRoutes({
+        home: { path: '/', moduleId: 'pages/home/homePage' },
+        notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
+      })
+      .on('routeload', function onRouteLoad(View, routeArguments) {
+        // When a route loads, render the view and attach it to the document
+        new View(routeArguments).attachTo('body');
+      })
+      .init(); // Set up event handlers and trigger the initial page load
+  });
+});</pre>
+
+<p>Here's an example Backbone view that uses a layout.</p>
+
+<pre>define(function(require) {
+  'use strict';
+  var Backbone = require('backbone'),
+      _ = require('underscore'),
+      homeTemplate = require('text!./homeTemplate.html'),
+      Layout = require('layouts/basicLayout/layout');
+
+  return Backbone.View.extend({
+    template: _.template(homeTemplate),
+    render: function() {
+      this.$el.html(this.template(this));
+      return this;
+    }
+  });
+});</pre>
+
+<p>This demo's source is in the <a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/backbone">RequireJS Router gh-pages branch</a>.</p>
