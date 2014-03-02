@@ -1,7 +1,7 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('ractive'),
-      layoutTemplate = require('text!./layoutTemplate.html'),
+  var Ractive = require('Ractive'),
+      layoutTemplate = require('rv!./layoutTemplate'),
       router = require('router');
 
   return Ractive.extend({

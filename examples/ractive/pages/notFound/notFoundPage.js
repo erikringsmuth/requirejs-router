@@ -1,7 +1,7 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('ractive'),
-      notFoundTemplate = require('text!./notFoundTemplate.html'),
+  var Ractive = require('Ractive'),
+      notFoundTemplate = require('rv!./notFoundTemplate'),
       Layout = require('layouts/basicLayout/layout');
 
   var NotFoundPage = Ractive.extend({

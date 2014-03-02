@@ -8,7 +8,7 @@ define([], function() {
       'rv': 'bower_components/requirejs-ractive/rv',
       'router': 'bower_components/requirejs-router/router',
       'amd-loader': 'bower_components/requirejs-ractive/amd-loader',
-      'ractive': 'bower_components/ractive/Ractive',
+      'Ractive': 'bower_components/ractive/Ractive',
       'utilities': '../common/utilities',
       'prettify': 'bower_components/google-code-prettify/src/prettify'
     }
