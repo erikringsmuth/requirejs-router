@@ -14,11 +14,12 @@
       </div>
       <nav class="collapse navbar-collapse" role="navigation">
         <ul class="nav navbar-nav">
+          <li class="{{routes.api.active ? 'active' : ''}}"><a href="#/api">API</a></li>
+          <li class="{{routes.demo.active ? 'active' : ''}}"><a href="#/demo/1337?queryParam1=Routing%20AMD%20style!">Demo</a></li>
+          <li class="{{routes.examples.active ? 'active' : ''}}"><a href="#/examples">MV* Examples</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li class="{{routes.api.active ? 'active' : ''}}"><a href="#/api">API</a></li>
-          <li class="{{routes.examples.active ? 'active' : ''}}"><a href="#/examples">MV* Examples</a></li>
-          <li class="{{routes.demo.active ? 'active' : ''}}"><a href="#/demo/1337?queryParam1=Routing%20AMD%20style!">Demo</a></li>
+          <li class="{{routes.download.active ? 'active' : ''}}"><a href="#/download">Download</a></li>
           <li><a href="https://github.com/erikringsmuth/requirejs-router">View on GitHub <i class="fa fa-github fa-lg"></i></a></li>
         </ul>
       </nav>

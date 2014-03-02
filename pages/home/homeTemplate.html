@@ -4,13 +4,13 @@
 
     <p class="lead">A scalable, lazy loading, AMD router.</p>
 
-    <p>The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.</p>
+    <p>The RequireJS Router lazy loads modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.</p>
 
     <p>The router works with <code>hashchange</code> and HTML5 <code>pushState</code>. One set of routes will match regular paths <code>/</code>, hash paths <code>#/</code>, and hashbang paths <code>#!/</code>.</p>
 
     <h2>Configuration</h2>
 
-    <p>Here's an example <code>main.js</code> using the RequireJS Router to run the app.</p>
+    <p>This is an example <code>main.js</code> using the RequireJS Router to run the app.</p>
 
     <pre>define([], function() {
   'use strict';
@@ -56,32 +56,22 @@
 
     <h2>Navigation</h2>
 
-    <p>There are three ways to trigger a route change. <code>hashchange</code>, <code>popstate</code>, or a page load.</p>
+    <p>There are three ways to trigger a route change. <code>hashchange</code>, <code>popstate</code>, and a full page load.</p>
+
+    <h4>hashchange</h4>
 
     <p>If you're using <code>hashchange</code> you don't need to do anything. Clicking a link <code>&lt;a href="#/new/page"&gt;New Page&lt;/a&gt;</code> will fire a <code>hashchange</code> event and tell the router to load the new route. You don't need to handle the event in your Javascript.</p>
 
+    <h4>pushState</h4>
+    
     <p>If you're using HTML5 <code>pushState</code> you need one extra step. The <code>pushState()</code> method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use <code>pushState()</code> to navigate to another route you need to call it like this.</p>
 
     <pre>history.pushState(stateObj, title, url); // push a new URL into the history stack
 history.go(0); // go to the current state in the history stack, this fires a popstate event</pre>
 
-    <p>You can also do a full page load which will call <code>router.loadCurrentRoute()</code> in <code>main.js</code>.</p>
-
-    <h2>Install</h2>
-
-    <p><a href="https://github.com/erikringsmuth/requirejs-router/archive/master.zip">Download</a> or run <code>bower install requirejs-router</code> in node.</p>
-
-    <h2>Build <a href="https://travis-ci.org/erikringsmuth/requirejs-router"><img src="https://github-camo.global.ssl.fastly.net/ab3d5adedae21dc7101032e7eeca6f8c9e4450da/68747470733a2f2f7472617669732d63692e6f72672f6572696b72696e67736d7574682f726571756972656a732d726f757465722e706e673f6272616e63683d6d6173746572" alt="Build Status" data-canonical-src="https://travis-ci.org/erikringsmuth/requirejs-router.png?branch=master" style="max-width:100%;"></h2>
-
-    <ul>
-    <li>Clone <code>git@github.com:erikringsmuth/requirejs-router.git</code></li>
-    <li>Run <code>npm install</code> to install dependencies</li>
-    <li>Run <code>gulp</code> to lint and minify your code. This will also watch for changes.</li>
-    </ul>
-
-    <h2>Running Tests</h2>
-
-    <p>Open <code>/tests/AmdSpecRunner.html</code> and make sure all tests pass.</p>
+    <h4>Full page load</h4>
+    
+    <p>You can also do a full page load which will call <code>router.init()</code> in <code>main.js</code> to load the new route.</p>
 
   </div>
 </div>

@@ -38,6 +38,7 @@ define([], function() {
         api: { path: '/api', moduleId: 'pages/api/apiPage' },
         examples: { path: '/examples', moduleId: 'pages/examples/examplesPage' },
         demo: { path: '/demo/:pathArg1', moduleId: 'pages/demo/demoPage' },
+        download: { path: '/download', moduleId: 'pages/download/downloadPage' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
       .on('routeload', function onRouteLoad(View) {
