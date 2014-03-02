@@ -1,5 +1,10 @@
 {
   "name": "requirejs-router",
+  "homepage": "http://erikringsmuth.github.io/requirejs-router/",
+  "authors": [
+    "Erik Ringsmuth <erik.ringsmuth@gmail.com>"
+  ],
+  "license": "MIT",
   "dependencies": {
     "requirejs": "~2.1.11",
     "requirejs-text": "~2.0.10",
@@ -7,6 +12,10 @@
     "requirejs-router": "~0.7.3",
     "ractive": "~0.3.9",
     "bootstrap": "~3.1.1",
+    "jquery": "~1.10.2",
+    "respond": "~1.4.2",
+    "html5shiv": "~3.7.0",
+    "polyfills": "*",
     "font-awesome": "~4.0.3",
     "google-code-prettify": "~1.0.1"
   }
