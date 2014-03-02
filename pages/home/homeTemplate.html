@@ -1,1 +1,76 @@
-<h1>RequireJS Router</h1>
+<div class="row">
+  <div class="col-xs-12">
+    <h1>RequireJS Router</h1>
+
+    <p class="lead">A scalable, lazy loading, AMD router.</p>
+
+    <p>The RequireJS Router lazy loads your modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.</p>
+
+    <p>The router works with <code>hashchange</code> and HTML5 <code>pushState</code>. One set of routes will match regular paths <code>/</code>, hash paths <code>#/</code>, and hashbang paths <code>#!/</code>.</p>
+
+
+    <h1>Configuration</h1>
+
+    <p>Here's an example main.js using the RequireJS Router to run the app.</p>
+
+<pre>define([], function() {
+  'use strict';
+
+  // Configure require.js paths and shims
+  require.config({
+    paths: {
+      'text': 'bower_components/requirejs-text/text',
+      'router': 'bower_components/requirejs-router/router'
+    }
+  });
+
+  // Load the router
+  require(['router'], function(router) {
+    router
+      .registerRoutes({
+        // matches an exact path
+        home: { path: '/home', moduleId: 'home/homeView' },
+
+        // matches using a wildcard
+        customer: { path: '/customer/*', moduleId: 'customer/customerView' },
+
+        // matches using a path variable
+        order: { path: '/orders/:id', moduleId: 'order/orderView' },
+
+        // matches a pattern like '/word/number'
+        regex: { path: /^\/\w+\/\d+$/i, moduleId: 'regex/regexView' },
+
+        // matches everything else
+        notFound: { path: '*', moduleId: 'notFound/notFoundView' }
+      })
+      .on('routeload', function(module, routeArguments) {
+        // When a route loads, render the view and attach it to the document
+        var body = document.querySelector('body');
+        body.innerHTML = '';
+        body.appendChild(new module(routeArguments).outerEl);
+      })
+      .init(); // Set up event handlers and trigger the initial page load
+  });
+});</pre>
+
+    <p>There is only one instance of the router. Loading the router in multiple AMD modules will reference the same router. This lets you listen to and fire <code>statechange</code> and <code>routeload</code> events using <code>router.on()</code> and <code>router.fire()</code>.</p>
+
+
+    <h1>Router Properties</h1>
+
+    <ul>
+      <li><code>router.routes</code> - All registered routes</li>
+      <li><code>router.registerRoutes(routes)</code> - Register your routes</li>
+      <li><code>router.init([options])</code> - Set up event handlers and trigger the initial page load</li>
+      <li><code>router.on('routeload', routeLoadedCallback)</code> - Called when the route's AMD module finishes loading</li>
+      <li><code>router.routeArguments([route, [url]])</code> - Returns an object with the path variables and query parameter values from the URL</li>
+      <li><code>router.urlPath(url)</code> - Returns the hash path if it exists otherwise returns the normal path</li>
+      <li><code>router.activeRoute</code> - A reference to the active route {path: '/home', moduleId: 'home/homeView'}</li>
+      <li><code>router.loadCurrentRoute()</code> - Manually tell the router to load the module for the current route</li>
+      <li><code>router.testRoute(route, [url])</code> - Test if the route matches the current URL</li>
+      <li><code>router.on('statechange', onStateChangeCallback)</code> - Called when a hashchange or popstate event is fired</li>
+      <li><code>router.fire(eventName, [arg1, [arg2]])</code> - Manually fire an event</li>
+      <li><code>router.off(eventName, eventHandler)</code> - Remove an event handler</li>
+    </ul>
+  </div>
+</div>

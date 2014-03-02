@@ -3,13 +3,15 @@ define(function(require) {
   var Ractive = require('Ractive'),
       demoTemplate = require('rv!./demoTemplate'),
       Layout = require('layouts/layout/layout'),
-      router = require('router');
+      router = require('router'),
+      utilities = require('utilities');
 
   var DemoPage = Ractive.extend({
     template: demoTemplate,
 
     init: function() {
       this.set('routeArguments', router.routeArguments());
+      utilities.formatCode(this.el);
     }
   });
 
