@@ -65,6 +65,9 @@ a, a:hover {
 .brand-link:hover {
   text-decoration: none;
 }
+.nex-brand {
+  color: #93A1A1;
+}
 
 /* Make the footer taller when viewed on a phone */
 @media (max-width: 480px) {
