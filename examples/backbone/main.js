@@ -28,6 +28,10 @@ define([], function() {
 
   // Load the router
   require(['router', 'jquery'], function(router, $) {
+
+    // Keep track of the currently loaded view so we can run teardown before loading the new view
+    var view;
+
     router
       .registerRoutes({
          // matches '/', '/examples/backbone/' (both localhost), or '/requirejs-router/examples/backbone/' (gh-pages server)
@@ -39,8 +43,12 @@ define([], function() {
       })
       .on('routeload', function onRouteLoad(View, routeArguments) {
         // When a route loads, render the view and attach it to the document
-        $('body').html('');
-        $('body').append(new View(null, routeArguments).render().el);
+        if (view) {
+          view.remove();
+        }
+        view = new View(null, routeArguments);
+        view.render();
+        $('body').append(view.el);
       })
       .init(); // Set up event handlers and trigger the initial page load
   });

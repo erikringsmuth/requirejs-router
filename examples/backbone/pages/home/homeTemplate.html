@@ -7,6 +7,10 @@
 
   // Load the router
   require(['router'], function(router) {
+  
+    // Keep track of the currently loaded view so we can run teardown before loading the new view
+    var view;
+
     router
       .registerRoutes({
         home: { path: '/', moduleId: 'pages/home/homePage' },
@@ -14,8 +18,12 @@
       })
       .on('routeload', function onRouteLoad(View, routeArguments) {
         // When a route loads, render the view and attach it to the document
-        $('body').html('');
-        $('body').append(new View(null, routeArguments).render().el);
+        if (view) {
+          view.remove();
+        }
+        view = new View(null, routeArguments);
+        view.render();
+        $('body').append(view.el);
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
