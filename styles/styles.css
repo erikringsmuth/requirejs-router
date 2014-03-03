@@ -59,6 +59,13 @@ a, a:hover {
   color: #007fff;
 }
 
+.brand-link {
+  color: #333;
+}
+.brand-link:hover {
+  text-decoration: none;
+}
+
 /* Make the footer taller when viewed on a phone */
 @media (max-width: 480px) {
   footer {
