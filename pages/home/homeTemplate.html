@@ -7,7 +7,10 @@
     <p>The RequireJS Router lazy loads modules as you navigate to each page. You're site could contain 10MB of Javascript and HTML templates and it would only load the 10KB needed for the current page.</p>
 
     <p>The router works with <code>hashchange</code> and HTML5 <code>pushState</code>. One set of routes will match regular paths <code>/</code>, hash paths <code>#/</code>, and hashbang paths <code>#!/</code>.</p>
-
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-8">
     <h2>Configuration</h2>
 
     <p>This is an example <code>main.js</code> using the RequireJS Router to run the app.</p>
@@ -46,7 +49,7 @@
         // When a route loads, render the view and attach it to the document
         var body = document.querySelector('body');
         body.innerHTML = '';
-        body.appendChild(new module(routeArguments).outerEl);
+        body.appendChild(new module(routeArguments).el);
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
@@ -54,6 +57,9 @@
 
     <p>There is only one instance of the router. Loading the router in multiple AMD modules will reference the same router. This lets you listen to and fire <code>statechange</code> and <code>routeload</code> events using <code>router.on()</code> and <code>router.fire()</code>.</p>
 
+  </div>
+
+  <div class="col-md-4">
     <h2>Navigation</h2>
 
     <p>There are three ways to trigger a route change. <code>hashchange</code>, <code>popstate</code>, and a full page load.</p>
@@ -66,12 +72,13 @@
     
     <p>If you're using HTML5 <code>pushState</code> you need one extra step. The <code>pushState()</code> method was not meant to change the page, it was only meant to push state into history. This is an "undo" feature for single page applications. To use <code>pushState()</code> to navigate to another route you need to call it like this.</p>
 
-    <pre>history.pushState(stateObj, title, url); // push a new URL into the history stack
-history.go(0); // go to the current state in the history stack, this fires a popstate event</pre>
+    <pre>// push a new URL into the history stack
+history.pushState(stateObj, title, url);
+// fire a popstate event
+history.go(0);</pre>
 
     <h4>Full page load</h4>
     
     <p>You can also do a full page load which will call <code>router.init()</code> in <code>main.js</code> to load the new route.</p>
-
   </div>
 </div>
