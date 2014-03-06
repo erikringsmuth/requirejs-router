@@ -28,6 +28,9 @@ footer ul a, footer .text-muted {
 .navbar {
   margin-bottom: -10px;
 }
+.navbar-default {
+  border: none;
+}
 .navbar,
 .navbar-default .navbar-brand,
 .navbar-default .navbar-brand:hover,
@@ -37,18 +40,30 @@ footer ul a, footer .text-muted {
   color: #fff;
   text-shadow: 0px 1px 0px #215b90;
 }
-.navbar-default .navbar-brand:hover,
-.navbar-default .navbar-nav > li > a:hover {
-  text-shadow: 0px 1px 2px #215b90;
+.navbar-header,
+.navbar-default .navbar-nav > li > a {
+  border-bottom: 4px solid #2f83d0;
+  transition: all .15s ease-in-out;
 }
-
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus,
 .navbar-default .navbar-toggle:hover,
-.navbar-default .navbar-toggle:focus {
+.navbar-default .navbar-toggle:focus,
+.navbar-header:hover,
+.navbar-header.active,
+.navbar-default .navbar-nav > li > a:hover {
   color: #fff;
-  background-color: #2b79c0;
+  background-color: #2f83d0;
+  text-shadow: 0px 1px 2px #215b90;
+  border-bottom-color: rgba(255,255,255,.7);
+}
+@media (max-width: 767px) {
+  .navbar-header,
+  .navbar-header:hover,
+  .navbar-header.active {
+    border-bottom: none;
+  }
 }
 
 .navbar-default .navbar-toggle .icon-bar {
