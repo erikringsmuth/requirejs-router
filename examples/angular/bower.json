@@ -1,0 +1,13 @@
+{
+  "name": "requirejs-router-angular",
+  "version": "0.0.0",
+  "dependencies": {
+    "requirejs": "~2.1.11",
+    "requirejs-text": "~2.0.10",
+    "requirejs-router": "~0.7.3",
+    "angular": "~1.2.16",
+    "bootstrap": "~3.1.1",
+    "font-awesome": "~4.0.3",
+    "google-code-prettify": "~1.0.1"
+  }
+}

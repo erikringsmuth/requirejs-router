@@ -1,0 +1,17 @@
+<header class="navbar navbar-default" ng-controller="BasicLayoutController">
+  <div class="container">
+    <nav>
+      <a href="#/" class="navbar-brand">RequireJS Router - Ractive</a>
+      <ul class="nav navbar-nav navbar-right">
+        <li ng-class="{active: routes.demo.active}"><a href="#/demo/123?queryParam1=Routing%20with%20Angular!">Demo</a></li>
+        <li ng-class="{active: routes.sidebar1.active}"><a href="#/sidebar1">Sidebar 1</a></li>
+        <li ng-class="{active: routes.sidebar2.active}"><a href="#/sidebar2">Sidebar 2</a></li>
+        <li><a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/ractive" target="_blank">View Source <i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <content-placeholder/>
+</main>
