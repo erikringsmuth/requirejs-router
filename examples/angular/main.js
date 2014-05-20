@@ -26,10 +26,10 @@ define([], function() {
         sidebar2: { path: '/sidebar2', moduleId: 'pages/sidebar2/sidebar2Page' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
-      .on('routeload', function onRouteLoad(controller) {
-        // Swap the body with the controller's layout and template
-        document.querySelector('body').innerHTML = controller.layout;
-        document.querySelector('content-placeholder').innerHTML = controller.template;
+      .on('routeload', function onRouteLoad(view) {
+        // When a route loads, render the view and attach it to the document
+        document.querySelector('body').innerHTML = view.layout;
+        document.querySelector('content-placeholder').innerHTML = view.template;
       })
       .init(); // Set up event handlers and trigger the initial page load
   });

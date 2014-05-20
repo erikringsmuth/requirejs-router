@@ -1,6 +1,7 @@
 define(function(require) {
   'use strict';
   var app       = require('app'),
+      angular   = require('angular'),
       template  = require('text!./sidebar1Template.html'),
       Layout    = require('layouts/sidebarLayout/layout');
 
