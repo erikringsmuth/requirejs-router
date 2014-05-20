@@ -1,10 +1,16 @@
 define(function(require) {
   'use strict';
-  var angular = require('angular');
+  var app       = require('app'),
+      template  = require('text!./demoTemplate.html'),
+      Layout    = require('layouts/basicLayout/layout'),
+      router    = require('router');
 
-  var app = angular.module('app', []);
-  app.controller('App1', function ($scope) {
-    $scope.greeting = 'Erik';
-  });
-  angular.bootstrap(document, ['app']);
+  app.controller('DemoController', ['$scope', function ($scope) {
+    $scope.routeArguments = router.routeArguments();
+  }]);
+
+  return {
+    layout: Layout.template,
+    template: template
+  };
 });

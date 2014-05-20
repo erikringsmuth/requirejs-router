@@ -1,14 +1,12 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('Ractive'),
-      layoutTemplate = require('rv!./layoutTemplate'),
-      router = require('router');
+  var app       = require('app'),
+      template  = require('text!./layoutTemplate.html'),
+      router    = require('router');
 
-  return Ractive.extend({
-    template: layoutTemplate,
+  app.controller('SidebarLayoutController', ['$scope', function ($scope) {
+    $scope.routes = router.routes;
+  }]);
 
-    data: {
-      routes: router.routes
-    }
-  });
+  return { template: template };
 });

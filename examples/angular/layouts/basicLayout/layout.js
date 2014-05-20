@@ -5,9 +5,8 @@ define(function(require) {
       router    = require('router');
 
   app.controller('BasicLayoutController', ['$scope', function ($scope) {
-    //app.attach(template, $scope, 'body');
     $scope.routes = router.routes;
   }]);
 
-  return template;
+  return { template: template };
 });

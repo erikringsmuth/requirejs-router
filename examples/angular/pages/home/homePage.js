@@ -2,12 +2,15 @@ define(function(require) {
   'use strict';
   var app       = require('app'),
       template  = require('text!./homeTemplate.html'),
-      Layout    = require('layouts/basicLayout/layout');
+      Layout    = require('layouts/basicLayout/layout'),
+      utilities = require('utilities');
 
   app.controller('HomeController', ['$scope', function ($scope) {
-    //app.attach(template, $scope, 'HomeController');
-    $scope.greeting = 'Erik';
+    utilities.formatCode(document.querySelector('body'));
   }]);
 
-  return template;
+  return {
+    layout: Layout.template,
+    template: template
+  };
 });

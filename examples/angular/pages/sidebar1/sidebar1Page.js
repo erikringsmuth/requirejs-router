@@ -1,14 +1,13 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('Ractive'),
-      sidebar1Template = require('rv!./sidebar1Template'),
-      Layout = require('layouts/sidebarLayout/layout');
+  var app       = require('app'),
+      template  = require('text!./sidebar1Template.html'),
+      Layout    = require('layouts/sidebarLayout/layout');
 
-  var Sidebar1Page = Ractive.extend({
-    template: sidebar1Template
-  });
+  app.controller('Sidebar1Controller', ['$scope', function ($scope) { }]);
 
-  return Layout.extend({
-    components: { 'content-placeholder': Sidebar1Page }
-  });
+  return {
+    layout: Layout.template,
+    template: template
+  };
 });

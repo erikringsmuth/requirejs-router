@@ -1,11 +1,13 @@
 define(function(require) {
   'use strict';
   var app       = require('app'),
-      template  = require('text!./homeTemplate.html');
+      template  = require('text!./notFoundTemplate.html'),
+      Layout    = require('layouts/basicLayout/layout');
 
-  app.controller('HomeController', ['$scope', function ($scope) {
-    $scope.greeting = 'Erik';
-  }]);
+  app.controller('NotFoundController', ['$scope', function ($scope) { }]);
 
-  return template;
+  return {
+    layout: Layout.template,
+    template: template
+  };
 });

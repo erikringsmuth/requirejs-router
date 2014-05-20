@@ -26,9 +26,10 @@ define([], function() {
         sidebar2: { path: '/sidebar2', moduleId: 'pages/sidebar2/sidebar2Page' },
         notFound: { path: '*', moduleId: 'pages/notFound/notFoundPage' }
       })
-      .on('routeload', function onRouteLoad(template) {
-        // When a route loads, replace the body with the template. Angular will handle creating a new controller.
-        document.querySelector('body').innerHTML = template;
+      .on('routeload', function onRouteLoad(controller) {
+        // Swap the body with the controller's layout and template
+        document.querySelector('body').innerHTML = controller.layout;
+        document.querySelector('content-placeholder').innerHTML = controller.template;
       })
       .init(); // Set up event handlers and trigger the initial page load
   });
