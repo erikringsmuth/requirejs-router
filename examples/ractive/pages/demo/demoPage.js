@@ -1,9 +1,9 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('Ractive'),
-      demoTemplate = require('rv!./demoTemplate'),
-      Layout = require('layouts/basicLayout/layout'),
-      router = require('router');
+  var Ractive       = require('Ractive'),
+      demoTemplate  = require('rv!./demoTemplate'),
+      Layout        = require('layouts/basicLayout/layout'),
+      router        = require('router');
 
   var DemoPage = Ractive.extend({
     template: demoTemplate,

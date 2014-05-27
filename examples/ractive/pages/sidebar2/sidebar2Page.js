@@ -1,8 +1,8 @@
 define(function(require) {
   'use strict';
-  var Ractive = require('Ractive'),
-      sidebar2Template = require('rv!./sidebar2Template'),
-      Layout = require('layouts/sidebarLayout/layout');
+  var Ractive           = require('Ractive'),
+      sidebar2Template  = require('rv!./sidebar2Template'),
+      Layout            = require('layouts/sidebarLayout/layout');
 
   var Sidebar2Page = Ractive.extend({
     template: sidebar2Template

@@ -1,10 +1,10 @@
 define(function(require) {
   'use strict';
-  var Backbone = require('backbone'),
-      _ = require('underscore'),
-      demoTemplate = require('text!./demoTemplate.html'),
-      Layout = require('layouts/basicLayout/layout'),
-      router = require('router');
+  var Backbone      = require('backbone'),
+      _             = require('underscore'),
+      demoTemplate  = require('text!./demoTemplate.html'),
+      Layout        = require('layouts/basicLayout/layout'),
+      router        = require('router');
 
   var DemoPage = Backbone.View.extend({
     template: _.template(demoTemplate),

@@ -1,10 +1,10 @@
 define(function(require) {
   'use strict';
-  var Nex = require('nex'),
-      Handlebars = require('handlebars'),
-      homeTemplate = require('text!./homeTemplate.html'),
-      Layout = require('layouts/basicLayout/layout'),
-      utilities = require('utilities');
+  var Nex           = require('nex'),
+      Handlebars    = require('handlebars'),
+      homeTemplate  = require('text!./homeTemplate.html'),
+      Layout        = require('layouts/basicLayout/layout'),
+      utilities     = require('utilities');
 
   return Nex.defineComponent('home-page', {
     template: Handlebars.compile(homeTemplate),
