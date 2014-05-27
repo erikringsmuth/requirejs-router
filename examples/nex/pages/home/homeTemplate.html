@@ -24,10 +24,10 @@
 
 <pre>define(function(require) {
   'use strict';
-  var Nex = require('nex'),
-      Handlebars = require('handlebars'),
+  var Nex          = require('nex'),
+      Handlebars   = require('handlebars'),
       homeTemplate = require('text!./homeTemplate.html'),
-      Layout = require('layouts/basicLayout/layout');
+      Layout       = require('layouts/basicLayout/layout');
 
   return Nex.defineComponent('home-page', {
     template: Handlebars.compile(homeTemplate),
