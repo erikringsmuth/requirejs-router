@@ -1,7 +1,6 @@
 define(function(require) {
   'use strict';
   var app       = require('app'),
-      angular   = require('angular'),
       template  = require('text!./homeTemplate.html'),
       Layout    = require('layouts/basicLayout/layout'),
       utilities = require('utilities');

@@ -1,17 +1,13 @@
 <div ng-controller="HomeController">
   <p>This site demos routing a Angular app with 2 different layouts. The home page and demo page use the <code>basicLayout</code>. The Sidebar 1 and Sidebar 2 pages use the <code>sidebarLayout</code>.</p>
 
-  <p>The router doesn't know the layout exists. It simply takes the module/view that was loaded and attaches it to the document. Here's a simplified <code>main.js</code> using the router to load a Angular view.</p>
+  <p>Here's a simplified <code>main.js</code> using the router to load a Angular view.</p>
 
   <pre>define([], function() {
     'use strict';
 
     // Load the router
     require(['router'], function(router) {
-
-      // Keep track of the currently loaded view so we can run teardown before loading the new view
-      var view;
-
       router
         .registerRoutes({
           home: { path: '/', moduleId: 'pages/home/homePage' },
@@ -19,15 +15,8 @@
         })
         .on('routeload', function onRouteLoad(View) {
           // When a route loads, render the view and attach it to the document
-          var render = function() {
-            view = new View({ el: 'body' });
-          };
-
-          if (view) {
-            view.teardown(render);
-          } else {
-            render();
-          }
+          document.querySelector('body').innerHTML = view.layout;
+          document.querySelector('content-placeholder').innerHTML = view.template;
         })
         .init(); // Set up event handlers and trigger the initial page load
     });
@@ -36,21 +25,19 @@
   <p>Here's an example Angular view that uses a layout.</p>
 
   <pre>define(function(require) {
-    'use strict';
-    var Angular = require('angular'),
-        homeTemplate = require('rv!./homeTemplate'),
-        Layout = require('layouts/basicLayout/layout');
+  'use strict';
+  var app       = require('app'),
+      template  = require('text!./homeTemplate.html'),
+      Layout    = require('layouts/basicLayout/layout');
 
-    // The HomePage
-    var HomePage = Angular.extend({
-      template: homeTemplate
-    });
+  app.controller('HomeController', ['$scope', function ($scope) {
+  }]);
 
-    // The object returned by the home page module is a Layout with the HomePage as a component
-    return Layout.extend({
-      components: { 'content-placeholder': HomePage }
-    });
-  });</pre>
+  return {
+    layout: Layout.template,
+    template: template
+  };
+});</pre>
 
-  <p>This demo's source is in the <a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/nex">RequireJS Router gh-pages branch</a>.</p>
+  <p>This demo's source is in the <a href="https://github.com/erikringsmuth/requirejs-router/tree/gh-pages/examples/angular">RequireJS Router gh-pages branch</a>.</p>
 </div>
