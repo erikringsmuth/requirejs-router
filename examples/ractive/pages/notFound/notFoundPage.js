@@ -1,6 +1,6 @@
 define(function(require) {
   'use strict';
-  var Ractive           = require('Ractive'),
+  var Ractive           = require('ractive'),
       notFoundTemplate  = require('rv!./notFoundTemplate'),
       Layout            = require('layouts/basicLayout/layout');
 
