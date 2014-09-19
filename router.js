@@ -1,6 +1,6 @@
 // RequireJS Router - A scalable, lazy loading, AMD router.
 //
-// Version: 0.7.3
+// Version: 0.8.0
 // 
 // The MIT License (MIT)
 // Copyright (c) 2014 Erik Ringsmuth
@@ -339,7 +339,7 @@ define([], function() {
           args[arg] = true;
         } else if (value === 'false') {
           args[arg] = false;
-        } else if (!isNaN(value) && value !== '') {
+        } else if (!isNaN(value) && value !== '' && value.charAt(0) !== '0') {
           // numeric
           args[arg] = +value;
         } else {

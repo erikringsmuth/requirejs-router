@@ -376,6 +376,13 @@ define([
       expect(result.id).toEqual(123);
     });
 
+    it('should consider a value like 00123 a string not a number', function() {
+      var route = {path: '/customer/:id'};
+      var url = 'http://domain.com/customer/00123?queryParam=true';
+      var result = router.routeArguments(route, url);
+      expect(result.id).toEqual('00123');
+    });
+
     it('should parse complicated URLs', function() {
       var route = {path: '/customer/:id'};
       var url = 'http://domain.com/customer/123?queryParam=false#!/customer/456?queryParam=true&queryParam2=some%20string';
