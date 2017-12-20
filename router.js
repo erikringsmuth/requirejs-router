@@ -152,6 +152,17 @@ define([], function() {
 
             // Load the route's module
             require([route.moduleId], function(module) {
+
+              // Execute module if it function
+              // Execute exports.default if it exist
+              if (typeof module != 'undefined') {
+                if (typeof module == 'function') {
+                  module();
+                } else if ('default' in module) {
+                  module.default();
+                }
+              }
+
               // Make sure this is still the active route from when loadCurrentRoute was called. The asynchronous nature
               // of AMD loaders means we could have fireed multiple hashchanges or popstates before the AMD module finished
               // loading. If we navigate to route /a then navigate to route /b but /b finishes loading before /a we don't
